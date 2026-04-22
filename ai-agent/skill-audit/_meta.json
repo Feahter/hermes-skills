@@ -1,0 +1,10 @@
+{
+  "name": "skill-audit",
+  "version": "1.0.0",
+  "description": "AI Agent Skills 安全扫描器 — 三层递归扫描系统",
+  "created_at": "2026-04-20T00:00:00Z",
+  "updated_at": "2026-04-20T00:00:00Z",
+  "license": "MIT",
+  "author": "hermes",
+  "tags": ["security", "auditing", "risk-assessment", "agent-tools"]
+}
