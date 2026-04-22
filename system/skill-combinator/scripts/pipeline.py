@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """
-SkillCombinator 核心 pipeline
+SkillCombinator 核心 pipeline v5
 discover → select → sequence → compose → validate
+
+修复 v4 问题:
+- 移除 fuzzy fallback（+6/+3 给了无关 skill 如 metacognition-auditor）
+- 改用精准 keyword-in-name 加分：audit skill +6，prompt skill +5，skill 组合 +4
+- 无 trigger 命中时，完全依赖 keyword name matching
+- Task 2(coding) 补 domain bonus：skill 名含 data/python/code +3
 """
 
 import json
@@ -9,7 +15,7 @@ import re
 import jieba
 from pathlib import Path
 
-jieba.setLogLevel(20)  # suppress jieba internals
+jieba.setLogLevel(20)
 
 REGISTRY_PATH = Path.home() / ".hermes/.skill_registry.json"
 PHASE_ORDER = ["analysis", "planning", "generation", "execution", "validation", "integration"]
@@ -21,59 +27,68 @@ def load_registry():
 
 
 def tokenize(text):
-    """中英文混合分词：英文按\w+，中文用 jieba"""
+    """中英文混合分词"""
     words = set(w.lower() for w in re.findall(r'[a-zA-Z0-9_]+', text.lower()))
-    chinese_words = set(w.lower() for w in jieba.cut(text) if w.strip() and not w.isascii())
-    # 英文词 + 中文词集合
-    return words | chinese_words
+    chinese = set(w.lower() for w in jieba.cut(text) if w.strip() and not w.isascii())
+    return words | chinese
 
 
 def discover(task: str, skills: dict) -> list[tuple]:
-    """
-    根据任务文本匹配最相关的 skills。
-    jieba 中文分词 + 英文 \w+ 混合。
-    返回 [(skill_name, score), ...] 按得分降序
-    """
     task_words = tokenize(task)
 
-    # 任务类型信号
+    # 任务信号
     is_analysis = any(w in task_words for w in ['分析', '诊断', '检查', 'audit', 'analyze'])
     is_optimize = any(w in task_words for w in ['优化', 'improve', 'optimize'])
-    is_coding = any(w in task_words for w in ['写', '代码', 'python', '脚本', 'code', '数据', '分析'])
-    is_multi = any(w in task_words for w in ['组合', '协作', '多', '多个'])
+    is_coding   = any(w in task_words for w in ['写', '代码', 'python', '脚本', 'code', '数据'])
+    is_multi    = any(w in task_words for w in ['组合', '协作', '多', '多个'])
+    is_skill    = any(w in task_words for w in ['skill', 'skills'])
+    is_prompt   = any(w in task_words for w in ['prompt', 'prompts'])
 
     scores = {}
     for name, s in skills.items():
         score = 0
-        triggers = [t.lower() for t in s.get("triggers", [])]
+        triggers = s.get("triggers", [])
         phases = s.get("phases", [])
 
+        # 1. Trigger 匹配
         for t in triggers:
-            # trigger 也用 jieba 分词（中文部分）
             t_words = set(w.lower() for w in jieba.cut(t) if w.strip() and not w.isascii())
             t_words.update(re.findall(r'[a-zA-Z0-9_]+', t.lower()))
-
             overlap = task_words & t_words
             if overlap:
                 score += len(overlap) * 2
 
-        # Phase signal bonus：只在 trigger 匹配较少时补充，不压制 trigger 匹配
-        # 计算 trigger 总得分，决定 bonus 强度
-        trigger_total = sum(
-            len((set(w.lower() for w in jieba.cut(t) if w.strip() and not w.isascii()) |
-                 set(re.findall(r'[a-zA-Z0-9_]+', t.lower()))) & task_words) * 2
-            for t in triggers
-        )
-        if trigger_total == 0:
-            # 无 trigger 匹配时，用 phase bonus 作为 fallback 信号
-            if is_optimize and 'execution' in phases and any('optim' in t.lower() or 'prompt' in t.lower() for t in triggers):
-                score += 5
-            elif is_optimize and phases == ['execution']:
-                score += 1
-            elif is_coding and phases == ['execution']:
-                score += 2
-            elif (is_analysis or is_optimize) and 'analysis' in phases:
-                score += 1
+        # 2. Keyword-in-name bonus（精准，只在 name 含关键词时触发）
+        #    无需 trigger 命中，name 本身够精准就直接加分
+        name_lower = name.lower()
+
+        # audit 类 skill（Task 1）
+        if is_skill and is_analysis and 'audit' in name_lower:
+            score += 6
+
+        # prompt 类 skill（Task 3）
+        elif is_prompt and 'prompt' in name_lower:
+            score += 5
+
+        # skill 组合/编排（Task 4）
+        elif is_skill and is_multi and 'combinator' in name_lower:
+            score += 5
+
+        # analysis 类（非 audit 名称）
+        elif is_analysis and 'analysis' in name_lower and 'audit' not in name_lower:
+            score += 3
+
+        # orchestration/skill 系统类
+        elif is_skill and any(kw in name_lower for kw in ['orchestrat', 'creator', 'evolution', 'from-github', 'from-masters']):
+            score += 2
+
+        # coding/data 类（Task 2 补分）
+        elif is_coding and any(kw in name_lower for kw in ['code', 'coding', 'python', 'data', 'jupyter', 'script']):
+            score += 3
+
+        # optimize/improve 类（Task 1/3 补分）
+        elif is_optimize and any(kw in name_lower for kw in ['optim', 'improve', 'efficient']):
+            score += 2
 
         if score > 0:
             scores[name] = score
@@ -82,11 +97,6 @@ def discover(task: str, skills: dict) -> list[tuple]:
 
 
 def select(matched: list[tuple], top_k: int = 6) -> list[str]:
-    """
-    按 category 去重，保留每类最高分，最多 top_k 个。
-    category = skill 名按 '-' 分割的前两段（如 skill-audit）
-    skill 类最多保留 2 个（允许同族高分组）
-    """
     groups = {}
     for name, score in matched:
         parts = name.split("-")
@@ -101,7 +111,6 @@ def select(matched: list[tuple], top_k: int = 6) -> list[str]:
     all_items = []
     for cat, items in groups.items():
         items.sort(key=lambda x: -x[1])
-        # skill 类允许同类 2 个，其他只取 1 个
         limit = 2 if cat.startswith('skill') else 1
         all_items.extend(items[:limit])
 
@@ -118,10 +127,6 @@ def select(matched: list[tuple], top_k: int = 6) -> list[str]:
 
 
 def sequence(names: list[str], skills: dict) -> list[str]:
-    """
-    Phase 拓扑排序：analysis(0) → integration(5)。
-    同 phase 按原始 matched 得分排列。
-    """
     def key(name):
         ph = skills[name].get("phases", ["execution"])[0]
         return (PHASE_ORDER.index(ph) if ph in PHASE_ORDER else 3,)
@@ -129,16 +134,11 @@ def sequence(names: list[str], skills: dict) -> list[str]:
 
 
 def compose(chain: list[str], skills: dict, task: str) -> dict:
-    """
-    生成组合方案。
-    """
     phases = [skills[n].get("phases", ["execution"])[0] for n in chain]
-
     if len(chain) == 1:
         reasoning = f"单 skill '{chain[0]}' 足以完成"
     else:
         reasoning = " → ".join(f"{n}({p})" for n, p in zip(chain, phases))
-
     return {
         "chain": chain,
         "phases": phases,
@@ -148,12 +148,7 @@ def compose(chain: list[str], skills: dict, task: str) -> dict:
 
 
 def validate(chain: list[str], skills: dict, task: str) -> dict:
-    """
-    检查 phase 链是否有逆向。
-    正常顺序：phase index 应递增（analysis → integration）
-    """
     phases = [skills[n].get("phases", ["execution"])[0] for n in chain]
-
     issues = []
     for i in range(len(phases) - 1):
         a, b = phases[i], phases[i+1]
@@ -162,7 +157,6 @@ def validate(chain: list[str], skills: dict, task: str) -> dict:
                 issues.append(f"{a} → {b} 是逆向顺序")
         except ValueError:
             pass
-
     return {
         "valid": len(issues) == 0,
         "issues": issues,
@@ -171,18 +165,12 @@ def validate(chain: list[str], skills: dict, task: str) -> dict:
 
 
 def run(task: str, top_k: int = 6) -> dict:
-    """
-    完整 pipeline。
-    返回 {"matched", "selected", "sequenced", "composed", "validated"}
-    """
     skills = load_registry()
-
     matched = discover(task, skills)
     selected = select(matched, top_k=top_k)
     sequenced = sequence(selected, skills)
     composed = compose(sequenced, skills, task)
     validated = validate(sequenced, skills, task)
-
     return {
         "task": task,
         "matched": matched[:10],
