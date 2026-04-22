@@ -38,33 +38,43 @@ metadata:
 ### 1. 发现（Discover）
 
 ```python
-def discover(task: str) -> list[Skill]:
-    """根据任务文本匹配最相关的 skills"""
-    # 匹配 triggers（关键词重叠计分）
-    # 匹配 phases（任务阶段 × skill 阶段覆盖度）
-    # 返回排序后的候选列表
+def discover(task: str) -> list[tuple[skill_name, score]]:
+    # 中英文混合分词：英文按\w+，中文按 bigram（2-gram）
+    # 三级匹配得分：
+    #   - trigger 英文词重叠 × 2
+    #   - trigger 中文 bigram 重叠 × 1
+    #   - phase signal bonus（analysis/optimize 任务 → analysis skill +3）
+    # 返回按得分降序排列
 ```
 
 ### 2. 排序（Sequence）
 
 ```python
-def sequence(skills: list[Skill], task: str) -> list[Skill]:
-    """确定组合顺序，拓扑排序"""
-    # 优先：analysis → planning → generation → execution → validation
-    # 同 phase 按 priority
-    # 冲突检测：有 conflicts 关系的skill不放相邻
+def sequence(skills: list[skill_name], task: str) -> list[skill_name]:
+    # Phase 拓扑排序：analysis(0) → planning(1) → generation(2)
+    #   → execution(3) → validation(4) → integration(5)
+    # 同 phase 按 discover 得分排列
+    # integration 排最后（最高层）
 ```
 
 ### 3. 组合（Compose）
 
 ```python
-def compose(skills: list[Skill], task: str) -> dict:
-    """返回组合方案"""
+def compose(skills: list[skill_name], task: str) -> dict:
     return {
         "chain": [...],           # 顺序排列的 skill 名
+        "phases": [...],          # 对应 phase
         "reasoning": "...",      # 为什么这样组合
-        "conflicts_resolved": [], # 解决了哪些冲突
+        "conflicts_resolved": [],
     }
+```
+
+### 4. 验证（Validate）
+
+```python
+def validate(chain: list, task: str) -> dict:
+    # 检查 phase 链是否有逆向（如 validation → analysis）
+    # 返回 {valid, issues, recommendation}
 ```
 
 ## Registry
@@ -73,13 +83,23 @@ def compose(skills: list[Skill], task: str) -> dict:
 
 自动从所有 SKILL.md 推断，包含 188 skills 的 phases/triggers。
 
-重建命令：
+**重建命令：**
 ```bash
-python3 -c "
-import sys; sys.path.insert(0, '~/.hermes/scripts');
-from skill_registry import build; build()
-"
+python3 ~/.hermes/scripts/skill_registry.py
 ```
+
+**脚本位置**：`~/.hermes/skills/system/skill-combinator/scripts/pipeline.py`
+
+**运行方式：**
+```bash
+python3 ~/.hermes/skills/system/skill-combinator/scripts/pipeline.py "多skill协作任务"
+```
+
+**关键实现细节（已修复的 bug）：**
+1. **中文分词**：必须用 bigram（2-gram），否则 `re.findall(r'\w+', ...)` 把整句中文当一个 token，导致中文任务永远匹配不上
+2. **Parent 去重**：所有 skill-* 的 parent 都是 None，直接用 None 去重会只剩 1 个；正确做法是用 skill 名前两段（如 `skill-audit`）做 category
+3. **integration 排序**：phase index = 5（最高），拓扑排序时会排在最后——这是正确的
+4. **Hidden 目录**：glob `**/SKILL.md` 时要排除 `.` 开头的目录，但 `.hermes` 不是 hidden
 
 ## Phase 覆盖
 
