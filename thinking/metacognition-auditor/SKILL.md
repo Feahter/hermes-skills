@@ -4,10 +4,20 @@ description: >
   元认知审计器 — 决策审计、预验尸、认知盲区检测。
   用于：技术选型时、故障复盘时、做重大决策时、多次失败后框架冲突时。
   核心功能：二阶思维执行、预验尸分析、认知盲区识别。
-triggers:
-  - keywords: ["元认知", "二阶思维", "预验尸", "pre-mortem", "second-order", "认知盲区", " Unknown Unknowns", "决策审计", "反思", "复盘"]
-    load: true
-    priority: high
+metadata:
+  combinator:
+    triggers:
+      - 元认知
+      - 二阶思维
+      - 预验尸
+      - pre-mortem
+      - second-order
+      - 认知盲区
+      - Unknown Unknowns
+      - 决策审计
+      - 反思
+      - 复盘
+      - metacognition
 ---
 
 # Metacognition Auditor — 元认知审计器

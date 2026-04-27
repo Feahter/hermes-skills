@@ -1,16 +1,19 @@
 ---
 name: brainstorming
-description: "---"
-triggers:
-  - "brainstorming"
-  - "brainstorming"
-source:
-  project: brainstorming
-  url: ""
-  license: ""
-  auto_generated: false
-  enhanced_via: skill-creator
-  updated_at: 2026-02-11T14:32:49
+description: 头脑风暴技能 - 创意发散与思路拓展。触发：需要创意想法、解决方案发散、思路拓展、多方案对比。
+metadata:
+  combinator:
+    triggers:
+      - brainstorming
+      - 头脑风暴
+      - 创意发散
+      - 想办法
+      - 多方案
+      - 思路拓展
+      - 创意写作
+      - ideation
+      - 创意
+      - brainstorm
 ---
 
 # Brainstorming

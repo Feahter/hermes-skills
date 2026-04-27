@@ -1,6 +1,14 @@
 ---
 name: meta-skill-skeleton
 description: Meta-skill 的骨架——整合所有高阶能力框架。触发：构建新skill时，或评估skill质量时使用。
+metadata:
+  combinator:
+    triggers:
+      - 构建技能
+      - 评估技能
+      - 技能框架
+      - 元技能
+      - 技能架构
 ---
 
 # Meta-Skill Skeleton

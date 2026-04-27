@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[必填] 替换为演示标题</title>
+
+  <!-- Fonts: Fontshare + Google Fonts -->
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@700,600&f[]=satoshi@400,500,700&display=swap">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;800&family=Cormorant:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <style>
+    /* ===========================================
+       CSS CUSTOM PROPERTIES (THEME)
+       =========================================== */
+    :root {
+      --ink: #0a0a0b;
+      --ink-rgb: 10, 10, 11;
+      --paper: #f1efea;
+      --paper-rgb: 241, 239, 234;
+      --paper-tint: #e8e5de;
+      --ink-tint: #18181a;
+
+      --font-serif-zh: 'Noto Serif SC', 'Playfair Display', serif;
+      --font-sans-zh: 'Noto Sans SC', 'Satoshi', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+      --font-display: 'Clash Display', sans-serif;
+      --font-body: 'Satoshi', sans-serif;
+
+      --title-size: clamp(2rem, 6vw, 5rem);
+      --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+      --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+      --body-size: clamp(0.75rem, 1.2vw, 1rem);
+      --small-size: clamp(0.65rem, 1vw, 0.875rem);
+      --kicker-size: clamp(0.6rem, 0.9vw, 0.75rem);
+      --meta-size: clamp(0.55rem, 0.8vw, 0.7rem);
+
+      --slide-padding: clamp(1.5rem, 4vw, 4rem);
+      --content-gap: clamp(1rem, 2vw, 2rem);
+      --element-gap: clamp(0.5rem, 1vw, 1rem);
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --duration-normal: 0.6s;
+      --duration-slow: 0.8s;
+
+      --serif-zh: var(--font-serif-zh);
+      --sans-zh: var(--font-sans-zh);
+      --mono: var(--font-mono);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow-x: hidden; }
+    html { scroll-snap-type: x mandatory; scroll-behavior: smooth; }
+
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background-color: var(--paper);
+      color: var(--ink);
+    }
+
+    .slide-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-height: 100%;
+      overflow: hidden;
+      padding: var(--slide-padding);
+    }
+
+    .bg-canvas-wrap { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    #bg-canvas { width: 100%; height: 100%; }
+
+    .slide.dark { background-color: var(--ink); color: var(--paper); }
+
+    /* Typography */
+    .h-hero { font-family: var(--serif-zh); font-size: clamp(3rem, 8vw, 7rem); font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; }
+    .h-xl { font-family: var(--serif-zh); font-size: var(--h2-size); font-weight: 700; line-height: 1.15; }
+    .h-sub { font-family: var(--serif-zh); font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 600; line-height: 1.2; }
+    .h-md { font-family: var(--serif-zh); font-size: var(--h3-size); font-weight: 600; }
+    .lead { font-family: var(--serif-zh); font-size: clamp(1rem, 1.8vw, 1.4rem); font-weight: 400; line-height: 1.5; opacity: 0.85; }
+    .body-zh { font-family: var(--sans-zh); font-size: var(--body-size); line-height: 1.6; }
+    .kicker { font-family: var(--mono); font-size: var(--kicker-size); text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; }
+    .meta { font-family: var(--mono); font-size: var(--meta-size); text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.5; }
+    .meta-row { display: flex; gap: 1em; align-items: center; font-family: var(--mono); font-size: var(--meta-size); text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6; }
+    .en { font-style: italic; }
+
+    /* Layout containers */
+    .frame { width: 100%; max-width: min(90vw, 1200px); margin: 0 auto; }
+    .frame > * + * { margin-top: var(--content-gap); }
+    .grid-2-7-5 { display: grid; grid-template-columns: 7fr 5fr; gap: clamp(2rem, 4vw, 4rem); align-items: start; }
+    .grid-2-6-6 { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 4vw, 4rem); }
+    .grid-2-8-4 { display: grid; grid-template-columns: 8fr 4fr; gap: clamp(2rem, 4vw, 4rem); }
+    .grid-3-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(0.5rem, 1vw, 1rem); }
+    .grid-6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 2vw, 2rem); }
+    .grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(1rem, 2vw, 2rem); }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 2vw, 2rem); }
+
+    /* Chrome & Foot */
+    .chrome { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: clamp(0.8rem, 2vw, 1.5rem) var(--slide-padding); font-family: var(--mono); font-size: var(--meta-size); text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.5; }
+    .foot { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: clamp(0.8rem, 2vw, 1.5rem) var(--slide-padding); font-family: var(--mono); font-size: var(--meta-size); opacity: 0.5; }
+
+    /* Cards & Callouts */
+    .callout { background: rgba(var(--ink-rgb), 0.06); border-left: 3px solid var(--ink); padding: clamp(0.8rem, 2vw, 1.5rem); font-family: var(--serif-zh); font-size: var(--body-size); line-height: 1.5; }
+    .slide.dark .callout { background: rgba(var(--paper-rgb), 0.1); border-left-color: var(--paper); }
+    .callout-src { font-family: var(--mono); font-size: var(--meta-size); opacity: 0.6; margin-top: 0.5em; }
+
+    .stat-card { background: rgba(var(--ink-rgb), 0.04); padding: clamp(1rem, 2vw, 1.5rem); border: 1px solid rgba(var(--ink-rgb), 0.1); }
+    .slide.dark .stat-card { background: rgba(var(--paper-rgb), 0.08); border-color: rgba(var(--paper-rgb), 0.2); }
+    .stat-label { font-family: var(--mono); font-size: var(--meta-size); text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; margin-bottom: 0.5em; }
+    .stat-nb { font-family: var(--serif-zh); font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 700; line-height: 1; }
+    .stat-unit { font-size: 0.4em; opacity: 0.5; font-style: normal; }
+    .stat-note { font-family: var(--sans-zh); font-size: var(--small-size); opacity: 0.7; margin-top: 0.5em; }
+
+    /* Pipeline */
+    .pipeline-section { margin-bottom: var(--content-gap); }
+    .pipeline-label { font-family: var(--mono); font-size: var(--meta-size); text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.5; margin-bottom: var(--element-gap); }
+    .pipeline { display: flex; gap: clamp(0.5rem, 1.5vw, 1.5rem); flex-wrap: wrap; }
+    .step { display: flex; flex-direction: column; gap: 0.3em; min-width: 80px; }
+    .step-nb { font-family: var(--mono); font-size: var(--meta-size); opacity: 0.5; }
+    .step-title { font-family: var(--serif-zh); font-size: var(--body-size); font-weight: 600; }
+    .step-desc { font-family: var(--sans-zh); font-size: var(--small-size); opacity: 0.7; }
+
+    /* Figures & Images */
+    .frame-img { position: relative; overflow: hidden; }
+    .frame-img img { width: 100%; height: 100%; max-height: 56vh; object-fit: cover; object-position: top center; display: block; }
+    .img-cap { font-family: var(--mono); font-size: var(--meta-size); opacity: 0.5; margin-top: 0.5em; display: flex; justify-content: space-between; }
+    .img-slot { border: 2px dashed rgba(var(--ink-rgb), 0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5em; min-height: 20vh; color: rgba(var(--ink-rgb), 0.3); font-family: var(--mono); font-size: var(--small-size); }
+    .img-slot .plus { font-size: 2em; line-height: 1; }
+    .tile { overflow: hidden; }
+
+    /* Icons */
+    [data-lucide] { width: 1em; height: 1em; }
+    .ico-lg { width: clamp(1.5rem, 3vw, 2.5rem); height: clamp(1.5rem, 3vw, 2.5rem); }
+    .ico-md { width: clamp(1rem, 2vw, 1.5rem); height: clamp(1rem, 2vw, 1.5rem); }
+    .ico-sm { width: clamp(0.8rem, 1.2vw, 1rem); height: clamp(0.8rem, 1.2vw, 1rem); }
+
+    /* Ghost Background Text */
+    .ghost { position: absolute; font-family: var(--font-display); font-size: 34vw; font-weight: 800; opacity: 0.06; pointer-events: none; user-select: none; line-height: 1; z-index: 0; }
+    .slide > * { position: relative; z-index: 1; }
+    .slide .ghost { z-index: 0; }
+
+    /* Highlight */
+    .hi { background: linear-gradient(to bottom, transparent 60%, rgba(var(--ink-rgb), 0.15) 60%); }
+    .slide.dark .hi { background: linear-gradient(to bottom, transparent 60%, rgba(var(--paper-rgb), 0.2) 60%); }
+
+    /* Animations */
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity var(--duration-normal) var(--ease-out-expo), transform var(--duration-normal) var(--ease-out-expo); }
+    .slide.visible .reveal { opacity: 1; transform: translateY(0); }
+    .reveal:nth-child(1) { transition-delay: 0.1s; }
+    .reveal:nth-child(2) { transition-delay: 0.2s; }
+    .reveal:nth-child(3) { transition-delay: 0.3s; }
+    .reveal:nth-child(4) { transition-delay: 0.4s; }
+    .reveal:nth-child(5) { transition-delay: 0.5s; }
+    .reveal:nth-child(6) { transition-delay: 0.6s; }
+
+    /* Inline Editing (opt-in) */
+    .edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+    .edit-toggle { position: fixed; top: 1rem; left: 1rem; z-index: 10001; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; background: var(--ink); color: var(--paper); border: none; padding: 0.5em 1em; font-family: var(--mono); font-size: 0.8rem; cursor: pointer; }
+    .edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+    body.edit-active [contenteditable="true"] { outline: 2px dashed rgba(0,0,0,0.3); cursor: text; }
+
+    /* Navigation */
+    .nav-dots { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem; z-index: 100; }
+    .nav-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(var(--ink-rgb), 0.2); cursor: pointer; transition: all 0.3s ease; }
+    .nav-dot.active { background: var(--ink); transform: scale(1.3); }
+    .slide.dark .nav-dot { background: rgba(var(--paper-rgb), 0.3); }
+    .slide.dark .nav-dot.active { background: var(--paper); }
+    .keyboard-hint { position: fixed; bottom: 2rem; right: 2rem; font-family: var(--mono); font-size: 0.65rem; opacity: 0.3; z-index: 100; }
+    .slide.dark .keyboard-hint { color: var(--paper); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .grid-2-7-5, .grid-2-6-6, .grid-2-8-4 { grid-template-columns: 1fr; }
+      .grid-6 { grid-template-columns: repeat(2, 1fr); }
+      .grid-3-3 { grid-template-columns: repeat(2, 1fr); }
+      .chrome, .foot { font-size: 0.6rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- WebGL Background Canvas -->
+  <div class="bg-canvas-wrap">
+    <canvas id="bg-canvas"></canvas>
+  </div>
+
+  <!-- Inline Edit Toggle (opt-in) -->
+  <div class="edit-hotzone"></div>
+  <button class="edit-toggle" id="editToggle" title="Edit mode (E)">Edit</button>
+
+  <!-- Slides Container -->
+  <main id="deck">
+
+    <!-- SLIDE 1: 开场封面 -->
+    <section class="slide hero dark">
+      <div class="chrome">
+        <div>分享 · 2026.04</div>
+        <div>Vol.01</div>
+      </div>
+      <div class="frame" style="display:grid; gap:4vh; align-content:center; min-height:80vh">
+        <div class="kicker reveal">私享会 · 分享者</div>
+        <h1 class="h-hero reveal">演讲标题</h1>
+        <h2 class="h-sub reveal">副标题</h2>
+        <p class="lead reveal" style="max-width:60vw">一句话简介，描述这场分享的核心内容。</p>
+        <div class="meta-row reveal">
+          <span>分享者</span><span>·</span><span>Title / Company</span>
+        </div>
+      </div>
+      <div class="foot">
+        <div>一场关于 XX 的分享</div>
+        <div>— 2026 —</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: 数据大字报 -->
+    <section class="slide light">
+      <div class="chrome">
+        <div>项目数据</div>
+        <div>02 / 08</div>
+      </div>
+      <div class="frame" style="padding-top:6vh">
+        <div class="kicker reveal">关键数据</div>
+        <h2 class="h-xl reveal">过去 64 天</h2>
+        <p class="lead reveal" style="margin-bottom:5vh">从 0 到开源项目。</p>
+        <div class="grid-6" style="margin-top:4vh">
+          <div class="stat-card reveal">
+            <div class="stat-label">Duration</div>
+            <div class="stat-nb">64<span class="stat-unit">天</span></div>
+            <div class="stat-note">持续迭代</div>
+          </div>
+          <div class="stat-card reveal">
+            <div class="stat-label">Stars</div>
+            <div class="stat-nb">5K+</div>
+            <div class="stat-note">GitHub</div>
+          </div>
+          <div class="stat-card reveal">
+            <div class="stat-label">Downloads</div>
+            <div class="stat-nb">41K</div>
+            <div class="stat-note">npm</div>
+          </div>
+        </div>
+      </div>
+      <div class="foot">
+        <div>项目名</div>
+        <div>Data</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: 左文右图 -->
+    <section class="slide light">
+      <div class="chrome">
+        <div>身份反差</div>
+        <div>03 / 08</div>
+      </div>
+      <div class="frame grid-2-7-5" style="padding-top:6vh; align-items:center">
+        <div style="display:flex; flex-direction:column; justify-content:space-between; gap:3vh">
+          <div>
+            <div class="kicker reveal">BUT</div>
+            <h2 class="h-xl reveal" style="font-size:clamp(2rem,5vw,4rem)">我不是程序员。</h2>
+            <p class="lead reveal" style="margin-top:2vh">大学毕业之后再也没写过代码。过去十年做的是 UI 设计和 AI 特效。</p>
+          </div>
+          <div class="callout reveal">
+            "这东西在三年前，需要一个十人团队做一年。"
+            <div class="callout-src">— 观察者</div>
+          </div>
+        </div>
+        <figure class="frame-img reveal" style="aspect-ratio:16/10; max-height:56vh">
+          <img src="images/product.png" alt="产品截图" onerror="this.parentElement.style.display='none'">
+          <figcaption class="img-cap">产品截图</figcaption>
+        </figure>
+      </div>
+      <div class="foot">
+        <div>Page 03 · 身份反差</div>
+        <div>— · —</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: 章节幕封 -->
+    <section class="slide hero light">
+      <div class="chrome">
+        <div>第一幕 · 核心观点</div>
+        <div>Act I · 04 / 08</div>
+      </div>
+      <div class="frame" style="display:grid; gap:6vh; align-content:center; min-height:80vh">
+        <div class="kicker reveal">Act I</div>
+        <h1 class="h-hero reveal" style="font-size:clamp(3rem,7vw,6rem)">核心观点</h1>
+        <p class="lead reveal" style="max-width:55vw">先看数字，再谈方法。</p>
+      </div>
+      <div class="foot">
+        <div>第一幕引子</div>
+        <div>— · —</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Navigation Dots -->
+  <nav class="nav-dots" id="navDots"></nav>
+  <div class="keyboard-hint">← → 键翻页</div>
+
+  <script>
+    /* ===== WEBGL BACKGROUND ===== */
+    (function() {
+      const canvas = document.getElementById('bg-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      function drawBG() {
+        const w = canvas.width, h = canvas.height;
+        const slideEl = document.querySelector('.slide.visible') || document.querySelector('.slide');
+        const isDark = slideEl && (slideEl.classList.contains('dark') || slideEl.classList.contains('hero dark'));
+        if (isDark) {
+          const g = ctx.createLinearGradient(0, 0, w, h);
+          g.addColorStop(0, '#0a0a0b');
+          g.addColorStop(0.5, '#1a1a2e');
+          g.addColorStop(1, '#0a0a0b');
+          ctx.fillStyle = g;
+        } else {
+          ctx.fillStyle = '#f1efea';
+        }
+        ctx.fillRect(0, 0, w, h);
+        requestAnimationFrame(drawBG);
+      }
+      drawBG();
+    })();
+
+    /* ===== SLIDE PRESENTATION CONTROLLER ===== */
+    class SlidePresentation {
+      constructor() {
+        this.slides = document.querySelectorAll('.slide');
+        this.currentSlide = 0;
+        this.totalSlides = this.slides.length;
+        this.init();
+      }
+
+      init() {
+        this.setupIntersectionObserver();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupNavDots();
+        this.setupInlineEdit();
+        if (this.slides.length > 0) this.slides[0].classList.add('visible');
+      }
+
+      setupIntersectionObserver() {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              const idx = Array.from(this.slides).indexOf(entry.target);
+              this.currentSlide = idx;
+              this.updateNavDots();
+            }
+          });
+        }, { threshold: 0.5 });
+        this.slides.forEach(slide => observer.observe(slide));
+      }
+
+      setupKeyboardNav() {
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); this.next(); }
+          else if (e.key === 'ArrowLeft') { e.preventDefault(); this.prev(); }
+        });
+      }
+
+      setupTouchNav() {
+        let startX = 0;
+        document.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+        document.addEventListener('touchend', (e) => {
+          const diff = startX - e.changedTouches[0].clientX;
+          if (Math.abs(diff) > 50) diff > 0 ? this.next() : this.prev();
+        }, { passive: true });
+      }
+
+      setupNavDots() {
+        const container = document.getElementById('navDots');
+        container.innerHTML = '';
+        this.slides.forEach((_, i) => {
+          const dot = document.createElement('div');
+          dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+          dot.addEventListener('click', () => this.goTo(i));
+          container.appendChild(dot);
+        });
+      }
+
+      updateNavDots() {
+        document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+          dot.classList.toggle('active', i === this.currentSlide);
+        });
+      }
+
+      setupInlineEdit() {
+        const hotzone = document.querySelector('.edit-hotzone');
+        const toggle = document.getElementById('editToggle');
+        if (!hotzone || !toggle) return;
+        let hideTimeout = null;
+        hotzone.addEventListener('mouseenter', () => { clearTimeout(hideTimeout); toggle.classList.add('show'); });
+        hotzone.addEventListener('mouseleave', () => { hideTimeout = setTimeout(() => toggle.classList.remove('show'), 400); });
+        toggle.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+        toggle.addEventListener('mouseleave', () => { hideTimeout = setTimeout(() => toggle.classList.remove('show'), 400); });
+        hotzone.addEventListener('click', () => toggle.classList.toggle('active'));
+        toggle.addEventListener('click', () => {
+          const isActive = document.body.classList.toggle('edit-active');
+          toggle.classList.toggle('active', isActive);
+          document.querySelectorAll('h1,h2,h3,p,.lead,.body-zh').forEach(el => {
+            el.setAttribute('contenteditable', isActive);
+          });
+        });
+        document.addEventListener('keydown', (e) => {
+          if ((e.key === 's' || e.key === 'S') && (e.ctrlKey || e.metaKey)) { e.preventDefault(); this.exportFile(); }
+          if (e.key === 'e' || e.key === 'E') {
+            if (!document.activeElement.getAttribute('contenteditable')) toggle.click();
+          }
+        });
+      }
+
+      exportFile() {
+        const editableEls = Array.from(document.querySelectorAll('[contenteditable]'));
+        editableEls.forEach(el => el.removeAttribute('contenteditable'));
+        document.body.classList.remove('edit-active');
+        document.getElementById('editToggle')?.classList.remove('active', 'show');
+        const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+        editableEls.forEach(el => el.setAttribute('contenteditable', true));
+        document.body.classList.add('edit-active');
+        document.getElementById('editToggle')?.classList.add('active');
+        const blob = new Blob([html], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'presentation.html';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+
+      next() { if (this.currentSlide < this.totalSlides - 1) this.goTo(this.currentSlide + 1); }
+      prev() { if (this.currentSlide > 0) this.goTo(this.currentSlide - 1); }
+      goTo(idx) { this.slides[idx].scrollIntoView({ behavior: 'smooth', inline: 'start' }); }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      new SlidePresentation();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

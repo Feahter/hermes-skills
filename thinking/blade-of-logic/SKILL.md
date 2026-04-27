@@ -1,6 +1,18 @@
 ---
 name: blade-of-logic
 description: 逻辑之刃 - 使用命题化、符号推理和逻辑分析庖丁解牛般拆解文本逻辑脉络。用于分析论证结构、识别逻辑谬误、构建严密推理、学术写作论证。适用场景：论文写作、辩论准备、决策分析、批判性思维训练。
+metadata:
+  combinator:
+    triggers:
+      - 逻辑之刃
+      - 逻辑分析
+      - 逻辑谬误
+      - 论证结构
+      - 命题逻辑
+      - 符号推理
+      - critical thinking
+      - 批判性思维
+      - 逻辑错误
 ---
 
 # 逻辑之刃 (Blade of Logic)

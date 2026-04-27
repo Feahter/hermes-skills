@@ -4,10 +4,19 @@ description: >
   复杂性思维传感器 — 检测 skill 组合的复杂度、相变临界点、涌现信号。
   用于：当技能组合产生意外结果时、故障排查时、系统行为异常时、技术架构评审时。
   核心功能：监控 skill 组合的复杂度、检测相变临界点、识别涌现行为。
-triggers:
-  - keywords: ["复杂度", "complexity", "涌现", "emergence", "相变", "混沌边缘", "非线性", "系统异常", "skill组合"]
-    load: true
-    priority: high
+metadata:
+  combinator:
+    triggers:
+      - 复杂度
+      - complexity
+      - 涌现
+      - emergence
+      - 相变
+      - 混沌边缘
+      - 非线性
+      - 系统异常
+      - skill组合
+      - complexity sensor
 ---
 
 # Complexity Sensor — 复杂性思维传感器

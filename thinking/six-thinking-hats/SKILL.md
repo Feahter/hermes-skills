@@ -1,6 +1,16 @@
 ---
 name: six-thinking-hats
 description: 六顶思考帽 - 爱德华·德博诺的平行思考方法。系统化地从六个维度分析问题：客观事实、情感直觉、风险谨慎、乐观价值、创意创新、控制流程。用于全面决策分析、团队讨论、问题解决。适用场景：重大决策、方案评估、创新发想、团队共识。
+metadata:
+  combinator:
+    triggers:
+      - 六顶思考帽
+      - 德博诺
+      - 六维分析
+      - 全面决策
+      - six thinking hats
+      - 平行思考
+      - 六帽思维
 ---
 
 # 六顶思考帽 (Six Thinking Hats)

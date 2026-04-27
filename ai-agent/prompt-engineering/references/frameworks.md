@@ -31,7 +31,18 @@ P(output|prompt) ∝ exp(⟨prompt, output⟩) / Z
 
 Role-Action-Context-Expectation
 
-### 法二：分层推理控制
+### 法二：CRISPE框架（社区首选）
+
+| 字段 | 含义 | 示例 |
+|------|------|------|
+| **C**ontext | 背景信息 | "我们的用户是香港年轻人..." |
+| **R**ole | 指定角色 | "你是一位资深营销专家..." |
+| **I**nstruction | 核心指令 | "列出三部分：目标、活动、预期效果" |
+| **S**teps | 步骤 | "1.分析目标 2.列举活动 3.预估效果" |
+| **P**arameters | 参数 | "语气活泼专业，800字以内" |
+| **E**xamples | 示例 | "输入→期望输出对照" |
+
+### 法三：分层推理控制
 
 | 层级 | 适用场景 | 成本控制 |
 |------|---------|---------|
@@ -41,7 +52,7 @@ Role-Action-Context-Expectation
 | high | 多步编码/推理 | 高 |
 | xhigh | 长代理/深度评估 | 最高 |
 
-### 法三：负向约束优先
+### 法四：负向约束优先
 
 - **Hard negative**（概率归零）：绝对禁止项
 - **Soft negative**（概率衰减）：尽量避免项
@@ -51,7 +62,7 @@ Role-Action-Context-Expectation
 软负向: "minimize jargon" → 概率衰减
 ```
 
-### 法四：符号压缩CoS
+### 法五：符号压缩CoS
 
 ```
 自然语言: "将大圆黑盘放在小方红块上面"
@@ -77,7 +88,36 @@ CoS: "(large, round, black) / (small, square, red)"
 
 ### 术2：输出契约工程
 
-### 术3：轻量级自评估
+### 术3：CRISPE结构化模板
+
+```
+## CONTEXT
+[背景信息：业务场景、用户群体]
+## ROLE
+[具体角色 + 领域经验描述]
+## INSTRUCTION
+[核心任务，祈使句]
+## STEPS
+1. [第一步]
+2. [第二步]
+3. [第三步]
+## PARAMETERS
+- 语气：[活泼专业/正式简洁]
+- 长度：[具体字数]
+- 格式：[Markdown/JSON/表格]
+## EXAMPLES
+[1-3个输入→输出示例]
+```
+
+### 术4：Few-Shot（少样本学习）
+
+给1-3个代表性示例，AI自动模仿风格和格式。适合：品牌文案、角色扮演、复杂输出格式。
+
+### 术5：Meta-Prompt（让AI优化Prompt）
+
+让AI扮演Prompt工程师 → 优化你的需求。迭代两轮效果最佳：生成 → 批判 → 再优化。
+
+### 术6：轻量级自评估
 
 ```
 Before finalizing, verify:
@@ -87,7 +127,7 @@ Before finalizing, verify:
 ☐ 自评分数 ≥ 4/5，否则修订后重新生成
 ```
 
-### 术4：Meta-Prompting流水线
+### 术7：Meta-Prompting流水线
 
 ```
 Step 1: 强模型分析50个失败trace → 聚类失败模式

@@ -1,6 +1,16 @@
 ---
 name: context-pollution-defender
 description: 防止长任务中上下文污染导致响应质量下降。触发：长任务(30min+/50+calls)、用户反馈跑偏、优先级固化。
+metadata:
+  combinator:
+    triggers:
+      - 上下文污染
+      - 跑偏
+      - 长任务
+      - 优先级固化
+      - 上下文重置
+      - context pollution
+      - 上下文管理
 ---
 
 # Context Pollution Defender

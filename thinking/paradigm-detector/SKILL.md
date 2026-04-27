@@ -4,10 +4,20 @@ description: >
   范式跃迁检测器 — 识别架构瓶颈、检测范式转移信号、触发重构时机。
   用于：系统成为枷锁时、专家用同样方法收益递减时、技术债累积时。
   核心功能：范式识别、跃迁信号检测、重构时机判断。
-triggers:
-  - keywords: ["范式", "paradigm", "架构瓶颈", "重构", "跃迁", "本体假设", "破坏性创新", "0到1", "技术债", "架构腐化"]
-    load: true
-    priority: high
+metadata:
+  combinator:
+    triggers:
+      - 范式
+      - paradigm
+      - 架构瓶颈
+      - 重构
+      - 跃迁
+      - 本体假设
+      - 破坏性创新
+      - 0到1
+      - 技术债
+      - 架构腐化
+      - paradigm shift
 ---
 
 # Paradigm Detector — 范式跃迁检测器

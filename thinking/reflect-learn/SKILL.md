@@ -3,21 +3,18 @@ name: reflect
 description: Self-improvement through conversation analysis. Extracts learnings from corrections and success patterns, permanently encoding them into agent definitions. Philosophy - Correct once, never again.
 version: "2.0.0"
 user-invocable: true
-triggers:
-  - reflect
-  - self-reflect
-  - review session
-  - what did I learn
-  - extract learnings
-  - analyze corrections
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Grep
-  - Glob
-  - Bash
 metadata:
+  combinator:
+    triggers:
+      - reflect
+      - self-reflect
+      - review session
+      - what did I learn
+      - extract learnings
+      - analyze corrections
+      - 自我反思
+      - 提取经验
+      - 会话复盘
   clawdbot:
     emoji: "🪞"
     config:

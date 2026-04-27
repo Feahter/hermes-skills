@@ -1,6 +1,17 @@
 ---
 name: debugging-reasoning-framework
 description: 高水平AI调试推理框架。触发：遇到bug/故障/系统异常时加载。替代简单的"已知问题→假设→验证"循环。
+metadata:
+  combinator:
+    triggers:
+      - 调试推理
+      - 反事实调试
+      - 差异调试
+      - 契约调试
+      - 时间切片调试
+      - counterfactual debugging
+      - differential debugging
+      - 调试框架
 ---
 
 # Debugging Reasoning Framework

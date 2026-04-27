@@ -1,6 +1,16 @@
 ---
 name: response-strategy-decider
 description: 结论优先 vs 风险前置的边界判断框架。触发：用户提出问题后不确定先给结论还是先说风险。
+metadata:
+  combinator:
+    triggers:
+      - 结论优先
+      - 风险前置
+      - 边界判断
+      - 响应策略
+      - 先说结论还是先说风险
+      - 回答策略
+      - 沟通策略
 ---
 
 # Response Strategy Decider

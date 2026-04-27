@@ -1,6 +1,16 @@
 ---
 name: ladder-of-abstraction
 description: 抽象之梯 - 将文本在具象细节与抽象概括之间自如转换。用于写作、思考、沟通时，把含混不清的表达改写成细腻具象（如莫言般的感官描写）或凝练抽象（如哲学概念）的表达。适用场景：创意写作、学术写作、演讲稿优化、概念澄清。
+metadata:
+  combinator:
+    triggers:
+      - 抽象之梯
+      - 具象化
+      - 抽象概括
+      - 概念澄清
+      - abstraction ladder
+      - 写作抽象
+      - 感官描写
 ---
 
 # 抽象之梯 (Ladder of Abstraction)

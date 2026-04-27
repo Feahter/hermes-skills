@@ -1,6 +1,16 @@
 ---
 name: mirror-of-perspectives
 description: 视角之镜 - 找到独特的观察角度，使复杂问题变得异常简单易解。用于问题解决、创新思考、突破思维定势。适用场景：难题攻关、产品设计、战略决策、创意发想。
+metadata:
+  combinator:
+    triggers:
+      - 视角之镜
+      - 多角度看问题
+      - 换位思考
+      - 突破思维定势
+      - 难题攻关
+      - perspective taking
+      - 创新思考
 ---
 
 # 视角之镜 (Mirror of Perspectives)

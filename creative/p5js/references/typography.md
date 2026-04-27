@@ -289,6 +289,89 @@ function draw() {
 }
 ```
 
+## Pretext — Zero-DOM Text Measurement
+
+For high-performance text layout without triggering DOM reflow, use **[Pretext](https://github.com/chenglou/pretext)** (`@chenglou/pretext`).
+
+**Why:** p5.js `textWidth()`, `textAscent()`, `textDescent()`, and `textBounds()` read from the browser's DOM measurement system, which triggers expensive layout reflows. Pretext bypasses this by using Canvas `measureText` as ground truth, returning exact `{ height, lineCount }` with pure arithmetic.
+
+**安装：**
+```html
+<script type="module">
+import { prepare, layout } from 'https://cdn.jsdelivr.net/npm/@chenglou/pretext@+esm';
+</script>
+```
+
+### 获取段落高度（无 DOM）
+
+```javascript
+let prepared;
+
+function setup() {
+  createCanvas(800, 600);
+  // 一次测量，返回 opaque handle（不要对同一文本重复调用）
+  prepared = prepare('你的多行文本内容', '16px Inter');
+}
+
+function draw() {
+  // 纯算术热路径 — 精确高度，不触发 reflow
+  const { height, lineCount } = layout(prepared, 400, 24); // 400px宽，24px行高
+  // height = Math.max(1, lineCount) * 24
+}
+```
+
+### 关键规则
+
+| 规则 | 原因 |
+|------|------|
+| **不重复 `prepare()`** | 一次测量，多次 `layout()` 调用。重复调用丢失预计算优势 |
+| **resize 时只调 `layout()`** | 宽度变化 → 新 `layout()` 调用，不调 `prepare()` |
+| **准备好再热路径** | `prepare()` 在 `setup()` 中做，`layout()` 才进 `draw()` 热路径 |
+
+### 多行文本 + Pretext 联动
+
+```javascript
+// 用 Pretext 计算精确高度，p5 渲染
+const prepared = prepare(longText, '15px Inter');
+const { height } = layout(prepared, cardWidth - 40, 22);
+
+// 用高度分配区域
+const cardHeight = height + headerHeight + footerHeight + padding;
+
+// 然后用 p5 text() 渲染（p5 text() 仍需调用，但高度已知）
+textWrap(WORD);
+text(longText, x, y, cardWidth - 40);
+```
+
+### 可变宽度布局（文本绕排）
+
+```javascript
+import { layoutNextLineRange, materializeLineRange } from '@chenglou/pretext';
+
+const prepared = prepare(text, '16px Inter');
+let cursor = { segmentIndex: 0, graphemeIndex: 0 };
+let y = startY;
+
+while (true) {
+  const width = isLeftOfObstacle(y) ? columnWidth - obstacleWidth : columnWidth;
+  const range = layoutNextLineRange(prepared, cursor, width);
+  if (range === null) break;
+  const line = materializeLineRange(prepared, range);
+  text(line.text, leftMargin, y);
+  cursor = range.end;
+  y += lineHeight;
+}
+```
+
+### 何时用 vs 何时不用
+
+| 用 Pretext | 用 p5 原生 |
+|-----------|-----------|
+| 大量文本（>1000字符）频繁重算 | 少量静态标签文本 |
+| 虚拟滚动/masonry/动态高度卡片 | 固定布局 |
+| 热路径中调用文本测量 | setup() 中一次性调用 |
+| 需要精确 `lineCount` 预分配 | 不关心精确行数 |
+
 ## Responsive Text Sizing
 
 ```javascript
