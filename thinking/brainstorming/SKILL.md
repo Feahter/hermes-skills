@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: 头脑风暴技能 - 创意发散与思路拓展。触发：需要创意想法、解决方案发散、思路拓展、多方案对比。
+description: 头脑风暴技能 - 创意发散与思路拓展。触发：需要创意想法、解决方案发散、思路拓展、多方案对比。For English-language project idea generation via constraints, see 'creative-ideation' instead.
 metadata:
   combinator:
     triggers:

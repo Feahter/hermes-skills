@@ -1,6 +1,6 @@
 ---
 name: local-agent-browser
-description: Fast headless browser automation CLI for AI agents (v0.26.0). Use when automating web interactions, scraping, filling forms, testing UIs, parallel sessions, network mocking, HAR recording, AI chat control, or auth vault. Keywords: browser, automation, headless, screenshot, scrape, form-fill, web-testing, batch, har, chat, auth-vault.
+description: "Fast headless browser automation CLI for AI agents (v0.26.0). Use when automating web interactions, scraping, filling forms, testing UIs, parallel sessions, network mocking, HAR recording, AI chat control, or auth vault. Keywords: browser, automation, headless, screenshot, scrape, form-fill, web-testing, batch, har, chat, auth-vault."
 read_when:
   - Automating web interactions or scraping
   - Filling forms programmatically

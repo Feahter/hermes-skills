@@ -1,6 +1,6 @@
 ---
 name: context-manager
-description: 上下文管理器 - 智能压缩、摘要和管理对话历史，优化长对话的token使用。用于长对话维护、信息提取、记忆管理。适用场景：长任务跟踪、多轮对话优化、历史会话检索。
+description: 上下文管理器 - 智能压缩、摘要和管理对话历史，优化长对话的token使用。用于长对话维护、信息提取、记忆管理。适用场景：长任务跟踪、多轮对话优化、历史会话检索。For knowledge graph construction and document relationship management, see the separate 'tapestry' skill.
 ---
 
 # Context Manager (上下文管理器)

@@ -1,6 +1,6 @@
 ---
 name: tapestry
-description: "知识图谱构建技能，用于文档关联和知识网络管理"
+description: "知识图谱构建技能，用于文档关联和知识网络管理。For conversation memory compression and dialogue context management, see the separate 'context-manager' skill."
 triggers:
   - "tapestry"
   - "tapestry"

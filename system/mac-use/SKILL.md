@@ -1,38 +1,262 @@
 ---
 name: mac-use
-description: Control macOS GUI apps visually — take screenshots, click, scroll, type. Use when the user asks to interact with any Mac desktop application's graphical interface.
+description: >
+  macOS GUI 自动化 — 通过"截图→OCR识别→点击/输入"的方式操作任意 Mac 桌面应用。
+  也整合了 Apple 原生应用（Notes/Reminders/iMessage）、Shell 命令执行、
+  第三方工具（macbot-cli/Peekaboo/MCP）的完整能力。
+  触发：macOS GUI操作、Mac桌面自动化、需要操作应用界面、或需要调用 AppleScript/MCP。
 metadata:
   openclaw:
     emoji: "🖥️"
     os: [darwin]
     requires:
-      bins: [python3]
+      bins: [python3, osascript]
     install:
       - id: python-brew
         kind: brew
         formula: python
         bins: [python3]
         label: Install Python 3 (brew)
+      - id: macbot-cli
+        kind: pip
+        package: macbot-cli
+        bins: [macbot]
+        label: Install macbot-cli (optional, for advanced controls)
+      - id: peekaboo
+        kind: brew
+        formula: peekaboo
+        bins: [peekaboo]
+        label: Install Peekaboo (optional, for pixel-precise GUI)
   combinator:
-    triggers: ['macOS GUI', 'mac桌面', 'Mac自动化', 'mac-use']
+    triggers: ['macOS GUI', 'mac桌面', 'Mac自动化', 'mac-use', '操作mac应用', 'gui自动化', 'apple应用']
 ---
 
 # Mac Use
 
-Control any macOS GUI application through a **screenshot → pick element → click → verify** loop.
+macOS 自动化操作员——整合 5 层能力，层层递进，按需取用。
 
-## Setup
+## 能力层次总览
 
-**Platform**: macOS only (requires Apple Vision framework for OCR)
+| 层次 | 方式 | 工具/命令 | 适用场景 |
+|------|------|----------|---------|
+| **L1** | GUI 截图自动化 | `mac_use.py` | 有文字界面的应用（截图→OCR→点击） |
+| **L2** | AppleScript/JXA | `osascript` | 支持脚本的原生 Mac 应用 |
+| **L3** | Shell 命令 | `terminal` 工具 | 文件操作、open 命令、系统命令 |
+| **L4** | 第三方 CLI | `macbot-cli` / `Peekaboo` | 高级控制（通知/窗口/WiFi/像素级操作） |
+| **L5** | Apple 原生应用 | 独立 skill | Notes/Reminders/iMessage/FindMy |
 
-**System binaries** (pre-installed on macOS):
-- `python3` — via Homebrew (`brew install python`)
-- `screencapture` — built-in macOS utility
+## L1: GUI 截图自动化（mac_use.py）
 
-**Python packages** — install from the skill directory:
+通过 **截图→OCR 识别文字→点击/输入** 的闭环操作任意 GUI 应用。
+
+### Setup
+
+**Python 包**（已安装 pyautogui，若缺失）：
 ```bash
-pip3 install --break-system-packages -r {baseDir}/requirements.txt
+pip3 install --break-system-packages pyautogui Pillow
 ```
+
+**macOS 权限**（必须，否则窗口列表为空）：
+- 系统设置 → 隐私与安全性 → **辅助功能** → 添加 terminal/hermes
+- 系统设置 → 隐私与安全性 → **屏幕录制** → 添加
+
+### Quick Reference
+
+```bash
+# 列出所有可见窗口
+python3 {baseDir}/scripts/mac_use.py list
+
+# 截图 + OCR 标注（返回图片 + 可点击元素列表）
+python3 {baseDir}/scripts/mac_use.py screenshot <app> [--id N]
+
+# 点击编号元素（主要方式）
+python3 {baseDir}/scripts/mac_use.py clicknum <N>
+
+# 点击坐标（仅用于无文字的图标）
+python3 {baseDir}/scripts/mac_use.py click --app <app> [--id N] <x> <y>
+
+# 滚动
+python3 {baseDir}/scripts/mac_use.py scroll --app <app> [--id N] <up|down|left|right> <amount>
+
+# 输入文字（剪贴板粘贴，支持中文）
+python3 {baseDir}/scripts/mac_use.py type --app <app> "文字内容"
+
+# 按键
+python3 {baseDir}/scripts/mac_use.py key --app <app> <combo>
+```
+
+### 坐标系统
+
+截图渲染到 **1000×1000 画布**：
+- 原点 (0,0) 在**左上角**
+- x 从左到右（0=左边缘，1000=右边缘）
+- y 从上到下（0=顶部，1000=底部）
+- 点击时脚本自动换算为实际屏幕坐标
+
+### 完整工作流
+
+```bash
+# 1. 打开目标应用
+open -a "AppName"
+sleep 2
+
+# 2. 截图并获取元素列表
+python3 {baseDir}/scripts/mac_use.py screenshot appname
+# → 返回 JSON 元素列表 + /tmp/mac_use.png 标注图
+
+# 3. 读标注图确认
+Read /tmp/mac_use.png
+
+# 4. 点击编号元素
+python3 {baseDir}/scripts/mac_use.py clicknum 5
+
+# 5. 输入文字
+python3 {baseDir}/scripts/mac_use.py type --app appname "内容"
+```
+
+## L2: AppleScript / JXA
+
+直接调用 macOS 原生脚本引擎，操作支持 AppleScript 的应用。
+
+### osascript 基础
+
+```bash
+# 执行 AppleScript
+osascript -e 'tell application "Finder" to return name of home'
+
+# 多行脚本
+osascript -e '
+tell application "System Events"
+    keystroke "hello"
+end tell
+'
+```
+
+### 常用场景
+
+```bash
+# 打开应用
+osascript -e 'tell application "Safari" to activate'
+
+# 读写剪贴板
+osascript -e 'set the clipboard to "内容"'
+osascript -e 'the clipboard'
+
+# 获取应用列表（支持脚本的应用）
+osascript -e 'tell application "System Events" to get name of every process'
+
+# 模拟按键
+osascript -e '
+tell application "System Events"
+    keystroke "s" using command down
+end tell
+'
+
+# 读写文件
+osascript -e 'tell application "Finder" to make new folder at desktop with properties {name:"测试"}'
+```
+
+### JXA（JavaScript for Automation）
+
+```bash
+# 执行 JS 脚本
+osascript -l JavaScript -e '
+Application("Safari").windows[0].url();
+'
+
+# 读写文件
+osascript -l JavaScript -e '
+const app = Application.currentApplication();
+app.includeStandardAdditions = true;
+app.doShellScript("echo hello");
+'
+```
+
+## L3: Shell 命令
+
+通过 terminal 工具执行系统命令，结合 `open` 命令操作应用。
+
+```bash
+# 打开任意应用/文件/URL
+open -a "WeChat"
+open "https://example.com"
+open ~/Documents/file.pdf
+
+# 通过 URL Scheme 触发应用动作
+open "slack://channel?team=xxx"
+open "x-devonthink://search?query=关键词"
+
+# 系统信息
+sw_vers           # macOS 版本
+system_profiler   # 硬件信息
+launchctl list    # 运行中的服务
+```
+
+## L4: 第三方工具
+
+### macbot-cli（通知/剪贴板/窗口/音量/WiFi/蓝牙）
+
+```bash
+pip3 install --break-system-packages macbot-cli
+
+# 通知
+macbot notify "任务完成"
+
+# 剪贴板
+macbot clipboard copy "内容"
+macbot clipboard paste
+
+# 窗口管理
+macbot window list
+macbot window move left
+
+# 系统控制
+macbot volume set 50
+macbot brightness set 80
+macbot wifi on
+macbot bluetooth off
+```
+
+### Peekaboo（像素级精准操作）
+
+适合无法用 OCR 定位的复杂界面（如验证码、专业设计软件）。
+
+```bash
+brew install peekaboo
+
+# 像素级点击
+peekaboo click --image "button.png"
+
+# 等待图像出现再点击
+peekaboo wait-for --image "dialog.png" --timeout 10 && peekaboo click --image "ok.png"
+```
+
+## L5: Apple 原生应用
+
+| 应用 | Skill | 说明 |
+|------|-------|------|
+| Notes 备忘录 | `apple-notes` | 创建/读取笔记 |
+| Reminders 提醒事项 | `apple-reminders` | 管理待办 |
+| iMessage 信息 | `imessage` | 发送短信 |
+| FindMy 查找 | `findmy` | 查找设备/AirTag |
+
+## 权限说明
+
+| 权限 | 路径 | 用途 |
+|------|------|------|
+| 辅助功能 | 隐私与安全性→辅助功能 | 窗口列表、按键模拟 |
+| 屏幕录制 | 隐私与安全性→屏幕录制 | 截图（mac_use.py 必须） |
+| 完全磁盘访问 | 隐私与安全性→完全磁盘访问 | 访问所有文件 |
+
+## 能力边界
+
+| ✅ 能做到 | ❌ 做不到 |
+|---------|---------|
+| 有文字界面的 GUI 应用 | 无文字的复杂界面（用 Peekaboo） |
+| 启动/激活应用 | 强制终止无响应的应用 |
+| 截图→OCR→点击 | 直接操作菜单栏 |
+| AppleScript 支持的应用 | 不支持脚本且无界面的应用 |
+| Shell 命令执行 | 需要 sudo 的系统操作 |
 
 ## How It Works
 

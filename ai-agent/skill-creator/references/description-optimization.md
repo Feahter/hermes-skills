@@ -42,6 +42,8 @@ This step matters — bad eval queries lead to bad descriptions.
 
 ### Step 3: Run the optimization loop
 
+> ⚠️ **Hermes 环境注意**：此 loop 依赖 `claude -p` 触发 skill 路由。在 Hermes Agent 里 `claude -p` 是独立进程，不走 Hermes skill 加载——eval 会给出全零分数，误导优化。如果你在 Hermes 环境，跳过 Step 3，直接用 talent-mind 自审 description 后手动更新。
+
 Tell the user: "This will take some time — I'll run the optimization loop in the background and check on it periodically."
 
 Save the eval set to the workspace, then run in the background:
@@ -55,7 +57,7 @@ python -m scripts.run_loop \
   --verbose
 ```
 
-Use the model ID from your system prompt (the one powering the current session) so the triggering test matches what the user actually experiences.
+Use the model ID from your system prompt (the one powering this session) so the triggering test matches what the user actually experiences.
 
 While it runs, periodically tail the output to give the user updates on which iteration it's on and what the scores look like.
 
@@ -82,6 +84,3 @@ python -m scripts.package_skill <path/to/skill-folder>
 ```
 
 After packaging, direct the user to the resulting `.skill` file path so they can install it.
-
----
-

@@ -322,31 +322,10 @@ Also references from `deep-research`:
 
 ---
 
+
 ## Quality Standards
 
-| # | Standard | Detail |
-|---|----------|--------|
-| W1 | Claims with citations | Every claim has a citation or paper's own data |
-| W2 | Zero citation orphans | In-text <-> reference list must perfectly match |
-| W3 | Consistent register | Academic tone appropriate for discipline |
-| W4 | Logical flow | Clear transitions between paragraphs/sections |
-| W5 | Word count compliance | Within +/-10% of target |
-| A1 | Independent abstract writing | zh-TW and EN composed independently (not mechanical translation) |
-| A2 | Structural alignment | Both abstracts cover same key points in same order |
-| A3 | Keywords | 5-7 per language reflecting core concepts |
-| A4 | Word count | EN: 150-300 words; zh-TW: 300-500 characters |
-| C1 | Format compliance | 100% adherence to selected citation style |
-| C2 | DOI inclusion | Every source with DOI must include it |
-| C3 | Currency | Flag sources older than 10 years (unless seminal) |
-| C4 | Self-citation ratio | Flag if >15% |
-| P1 | Five-dimension scoring | Originality 20%, Method Rigour 25%, Evidence 25%, Argument 15%, Writing 15% |
-| P2 | Actionable feedback | Every criticism includes specific suggestion |
-| P3 | Max 2 revision rounds | Unresolved items become Acknowledged Limitations |
-| M1 | AI disclosure | Every paper includes AI tool usage statement |
-| M2 | Limitations section | Explicitly discuss study limitations |
-| M3 | Ethics statement | When applicable (human subjects, sensitive data) |
-
----
+> 详细内容 → [references/quality-standards.md](references/quality-standards.md)（W1-W5写作标准、A1-A4摘要标准、C1-C4引用标准、P1-P3评审标准、M1-M3伦理标准）
 
 ## Output Language
 
@@ -365,6 +344,18 @@ Follows the user's language. Academic terminology is kept in English. Bilingual 
 | `academic-paper` + `academic-paper-reviewer` | Peer review -> revision loop |
 
 ---
+
+## Version History
+
+|| Version | Date | Changes ||
+|---------|------|---------|
+|| 2.4 | 2026-03-08 | LaTeX output hardening: `apa7` class, `ragged2e` justification, table width formula, bilingual abstract centering, font stack, tectonic PDF compilation ||
+|| 2.3 | 2026-03-08 | Added `visualization_agent` (11th) and `revision_coach_agent` (12th); Socratic convergence criteria; citation format conversion (APA 7 ↔ Chicago ↔ MLA ↔ IEEE ↔ Vancouver); Quick Mode Selection Guide; 9th mode: revision-coach ||
+|| 2.0 | 2026-02 | NEW plan mode, deep-research handoff, Chinese APA 7.0 citation guide, failure paths, mode selection guide ||
+|| 1.0 | 2026-01 | Initial release: 9-agent pipeline, 6 paper types, 5 citation formats, bilingual abstracts, multi-format output ||
+## Quality Standards
+
+> 详细内容 → [references/quality-standards.md](references/quality-standards.md)（W1-W5写作标准、A1-A4摘要标准、C1-C4引用标准、P1-P3同行评审标准、M1-M3伦理标准）
 
 ## Version History
 

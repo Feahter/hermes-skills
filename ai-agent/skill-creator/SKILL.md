@@ -1,6 +1,6 @@
 ---
 name: skill-creator
-description: Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.
+description: Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy. For basic skill writing from structured requirements, see 'write-a-skill' as a lighter alternative.
 ---
 
 # Skill Creator
@@ -28,6 +28,12 @@ Of course, you should always be flexible and if the user is like "I don't need t
 Then after the skill is done (but again, the order is flexible), you can also run the skill description improver, which we have a whole separate script for, to optimize the triggering of the skill.
 
 Cool? Cool.
+
+## ⚠️ 高影响字段规范（来自 write-a-skill）
+
+> 详细内容 → `references/write-a-skill-rules.md`（description 规范 / SKILL.md 行数限制 / 脚本添加原则）
+
+---
 
 ## 道层工具
 

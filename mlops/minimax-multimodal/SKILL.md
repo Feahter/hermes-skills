@@ -74,6 +74,8 @@ vision_analyze(image_url="图片路径或URL", question="要分析的问题")
 3. **生成禁区** — image-01 除非用户明确要求，否则不主动生成
 4. **自主判断** — 觉得场景适合就用，不需要每次请示
 
+**相关文档**：模型配额查询 → `references/models-quota.md`
+
 ## 快速参考
 
 ```python

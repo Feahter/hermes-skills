@@ -1,6 +1,6 @@
 ---
 name: skill-audit
-description: AI Agent Skills 安全扫描器。扫描 SKILL.md 内容中的危险 pattern、权限过大、数据外传风险。三层递归扫描：批量自动扫描（5min/179skills）→ 重点精准分析 → 元认知自我演进。触发：安装新 skill 前、批量审查、遇到可疑 skill。Keywords: skill audit, security scan, 安全扫描, 漏洞检测, 红队检测。
+description: "AI Agent Skills 安全扫描器。扫描 SKILL.md 内容中的危险 pattern、权限过大、数据外传风险。三层递归扫描：批量自动扫描（5min/179skills）→ 重点精准分析 → 元认知自我演进。触发：安装新 skill 前、批量审查、遇到可疑 skill。Keywords: skill audit, security scan, 安全扫描, 漏洞检测, 红队检测。"
 version: 1.0.0
 tags: [security, auditing, risk-assessment]
 source:

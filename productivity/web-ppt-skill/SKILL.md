@@ -1,21 +1,31 @@
 ---
 name: web-ppt-skill
-description: 生成单文件 HTML 演示文稿，融合电子杂志的叙事美学与工程化密度管理。支持横向翻页、主题切换、PPT 转换、内联编辑、Vercel 部署和 PDF 导出。当用户需要制作分享/演讲/发布会的网页 PPT，或提到"杂志风 PPT"、"horizontal swipe deck"、"web slides"、"HTML presentation"时使用。
+description: 生成单文件 HTML 演示文稿，融合电子杂志的叙事美学与工程化密度管理。支持横向翻页、主题切换（53 套）、动画特效（47 种）、Presenter 模式、PPT 转换、内联编辑、Vercel 部署和 PDF 导出。当用户需要制作分享/演讲/发布会的网页 PPT，或提到"杂志风 PPT"、"horizontal swipe deck"、"web slides"、"HTML presentation"时使用。
 ---
 
 # Web PPT Skill
 
-融合 magazine-web-ppt（叙事美学）× frontend-slides（工程密度管理）的下一代 HTML 演示文稿 skill。
+融合 **magazine-web-ppt**（叙事美学）× **frontend-slides**（工程密度管理）× **html-ppt-skill**（特效资产库）的 HTML 演示文稿 skill。
 
 ## 核心设计原则
 
-> 融合 magazine-web-ppt（叙事美学）× frontend-slides（工程密度管理）的设计哲学。
-
 ### 设计原则
 
-1. **叙事为主轴，密度为锚点** — 横向翻页（magazine 遗产）+ 严格量化溢出管理（frontend 遗产）
-2. **风格是变量，不是约束** — 17 套预设主题按需切换
+1. **叙事为主轴，密度为锚点** — 横向翻页 + 严格量化溢出管理
+2. **风格是变量，不是约束** — **53 套预设主题**按需切换（17 叙事/展示轴 + 36 特效轴）
 3. **内容永远服务于故事** — 不管技术多强大，第一问永远是"你的故事是什么"
+
+### 资产规模
+
+| 资产 | 数量 | 来源 |
+|------|------|------|
+| 主题色 | **53 套** | magazine-web-ppt (17) + html-ppt-skill (36) |
+| 页面布局 | **10 种** | magazine-web-ppt |
+| Full-Deck 模板 | **15 套** | html-ppt-skill |
+| CSS 动画 | **27 种** | html-ppt-skill |
+| Canvas FX 动画 | **20 种** | html-ppt-skill |
+| Presenter 模式 | ✅ | html-ppt-skill runtime.js |
+| 运行时键盘控制 | ✅ | html-ppt-skill runtime.js |
 
 ### 反 AI Slop（Anti-AI-Slop）
 
@@ -38,6 +48,7 @@ Phase 1 · Clarify   → 6+4 问需求澄清（叙事型 or 展示型）
 Phase 2 · Style     → 选叙事轴 → 风格预览 → 用户选
 Phase 3 · Generate  → 生成完整 HTML
 Phase 4 · Deliver   → 本地预览 + 可选部署/导出
+Phase 5 · Present   → Presenter 模式（可选）
 ```
 
 ---
@@ -85,7 +96,7 @@ Phase 4 · Deliver   → 本地预览 + 可选部署/导出
 - 8 页以上必须有 ≥1 个 `hero dark` + ≥1 个 `hero light`
 - **不能全是 `light` 正文页**，必须有 `dark` 正文页制造呼吸
 
-**生成后自检**：`grep 'class="slide' index.html` 列出所有主题，人工确认节奏合理再交付。
+**生成后自检**：`grep 'class=\"slide' index.html` 列出所有主题，人工确认节奏合理再交付。
 
 ### 1.2 六问澄清
 
@@ -187,8 +198,12 @@ mkdir -p ~/.hermes/skills/productivity/web-ppt-skill/.previews/
 | `references/themes.md` | 选定主题的完整 CSS 变量 | 生成前 |
 | `references/layouts.md` | 10 种布局骨架，直接粘贴 | 生成前 |
 | `references/components.md` | 组件手册（字体、色、网格、图标）| 生成中 |
+| `references/animations-from-html-ppt.md` | 47 种动画效果（27 CSS + 20 Canvas FX）| 动画增强时读 |
+| `references/full-decks-from-html-ppt.md` | 15 套完整 deck 模板 | 模板参考时读 |
+| `references/presenter-mode-from-html-ppt.md` | Presenter 模式完整指南 | 演讲者模式时读 |
 | `references/viewport-base.css` | 必须完整复制到每个演示 | 生成前 |
 | `assets/template.html` | 完整可运行模板（含 JS 控制器）| 生成前 |
+| `assets/runtime.js` | html-ppt-skill 键盘运行时（Presenter 模式依赖）| Presenter 模式时读 |
 
 ### ⚠️ P0 生成规则（必须通过，否则返工）
 
@@ -235,6 +250,17 @@ right: calc(-1 * clamp(28px, 3.5vw, 44px));
 5. **动画**：基于 Scroll-triggered（Intersection Observer），每页 `.slide` 进入视口触发动画
 6. **注释**：每个 section 加清晰注释块（`/* === SECTION NAME === */`）
 7. **中文优化**：衬线用 Noto Serif SC，非衬线用 Noto Sans SC，等宽用 IBM Plex Mono
+8. **Presenter 模式**：如需演讲者视图，引入 `assets/runtime.js` + 在每页加 `<div class="notes">讲稿内容</div>`
+
+### 动画特效（html-ppt-skill 资产）
+
+如需动画增强，参考 `references/animations-from-html-ppt.md`：
+
+**CSS 动画**（轻量，27 种）：`fade-up` / `rise-in` / `zoom-pop` / `blur-in` / `glitch-in` / `typewriter` / `neon-glow` / `shimmer-sweep` / `stagger-list` / `counter-up` / `path-draw` / `card-flip-3d` / `cube-rotate-3d` / `kenburns` / `ripple-reveal` ...
+
+**Canvas FX**（电影感，20 种）：`particle-burst` / `confetti-cannon` / `firework` / `starfield` / `matrix-rain` / `knowledge-graph` / `neural-net` / `constellation` / `galaxy-swirl` / `word-cascade` / `letter-explode` / `data-stream` / `typewriter-multi` ...
+
+用法：按 `A` 键循环切换动画（需引入 `assets/runtime.js`）。
 
 ### 内联编辑（opt-in）
 
@@ -254,8 +280,9 @@ right: calc(-1 * clamp(28px, 3.5vw, 44px));
 2. **告知用户**：
    - 文件路径、风格名称、页数
    - 导航：← → 键 / 滚轮 / 触屏滑动 / 底部圆点 / ESC 索引
-   - 自定义方式：改 `:root` CSS 变量换色 / 换 `<link>` 换字体 / 加 `.reveal` 类触发动画
+   - 自定义方式：改 `:root` CSS 变量换色 / 换 `<link>` 换字体 / 按 `A` 切换动画 / 按 `T` 切换 html-ppt-skill 主题
    - 内联编辑：左上角 hover 或按 E
+   - Presenter 模式：按 `S` 打开演讲者视图
 
 ---
 
@@ -293,26 +320,73 @@ bash scripts/export-pdf.sh <path-to-html> [output.pdf]
 
 ---
 
+## Phase 6: Presenter 模式（可选）
+
+**何时使用**：30-60 分钟演讲、需要讲稿、演讲者需要提词器。
+
+**两种启用方式**：
+1. **使用 full-deck 模板**：选 `templates/full-decks/presenter-mode-reveal/`（已内置完整讲稿）
+2. **给现有 deck 加讲稿**：在每个 `<section class="slide">` 内加 `<div class="notes">讲稿内容</div>`
+
+**按 `S` 打开 Presenter 视图**，4 张磁性卡片：
+- 当前幻灯片（像素级预览）
+- 下一页预览
+- 讲稿（逐字稿）
+- 计时器
+
+**讲稿写作 3 原则**：
+1. **信号词，不是朗读稿** — 加粗关键词，独立过渡句
+2. **每页 150-300 字** — ~2-3 分钟/页的节奏
+3. **像说话一样写** — 口语化，不要书面散文
+
+详细指南见 `references/presenter-mode-from-html-ppt.md`。
+
+**运行时键盘快捷键**：
+| 键 | 功能 |
+|---|------|
+| `← →` / `Space` | 翻页 |
+| `T` | 切换 html-ppt-skill 主题 |
+| `A` | 切换动画效果 |
+| `F` | 全屏 |
+| `S` | 打开 Presenter 视图 |
+| `O` | 概览网格 |
+| `N` | 打开讲稿浮层 |
+| `R` | 重置计时器 |
+
+---
+
 ## 文件结构
 
 ```
 web-ppt-skill/
-├── SKILL.md                  ← 本文件
+├── SKILL.md                          ← 本文件
 ├── assets/
-│   └── template.html         ← 完整可运行模板（含 JS 控制器）
+│   ├── template.html                 ← 完整可运行模板（含 JS 控制器）
+│   ├── runtime.js                    ← html-ppt-skill 键盘运行时（Presenter 模式依赖）
+│   ├── fx-runtime.js                ← Canvas FX 引擎
+│   ├── html-ppt-base.css            ← html-ppt-skill 基础样式
+│   ├── html-ppt-fonts.css           ← html-ppt-skill 字体
+│   ├── html-ppt-animations.css      ← 27 种 CSS 动画
+│   ├── html-ppt-themes/             ← 36 套 html-ppt-skill 特效主题
+│   ├── fx-animations/               ← 20 种 Canvas FX 脚本
+│   └── viewport-base.css            ← 响应式基础 CSS
 └── references/
-    ├── themes.md             ← 17 套主题预设
-    ├── layouts.md            ← 10 种布局骨架
-    ├── components.md         ← 组件手册
-    ├── viewport-base.css     ← 响应式基础 CSS
-    ├── animation.md          ← 动画模式参考
-    ├── checklist.md          ← 质量检查清单（P0/P1/P2/P3）
+    ├── themes.md                     ← 53 套主题预设（17+36）
+    ├── layouts.md                    ← 10 种布局骨架
+    ├── components.md                 ← 组件手册
+    ├── checklist.md                  ← 质量检查清单（P0/P1/P2/P3）
+    ├── viewport-base.css             ← 响应式基础 CSS（完整复制到每个演示）
+    ├── animations-from-html-ppt.md   ← 47 种动画效果
+    ├── full-decks-from-html-ppt.md   ← 15 套完整 deck 模板
+    ├── presenter-mode-from-html-ppt.md← Presenter 模式完整指南
     └── scripts/
-        ├── extract-pptx.py   ← PPT 内容提取
-        ├── deploy.sh         ← Vercel 部署脚本
-        ├── export-pdf.sh     ← PDF 导出脚本
-        └── image-utils.py    ← 图片处理工具
+        ├── extract-pptx.py           ← PPT 内容提取
+        ├── deploy.sh                 ← Vercel 部署脚本
+        ├── export-pdf.sh             ← PDF 导出脚本
+        └── image-utils.py            ← 图片处理工具
 ```
+
+---
 
 ## 资源加载顺序
 
@@ -323,4 +397,6 @@ web-ppt-skill/
 5. 读 `layouts.md` 选布局（顶部有密度检查清单）
 6. Phase 3 生成前，读 `checklist.md` P0 规则逐条对照
 7. 细节调整时读 `components.md`
-8. 生成后通读 `checklist.md`，逐项自检
+8. 需要动画时读 `animations-from-html-ppt.md`，需要模板时读 `full-decks-from-html-ppt.md`
+9. 需要 Presenter 模式时读 `presenter-mode-from-html-ppt.md` 并引入 `assets/runtime.js`
+10. 生成后通读 `checklist.md`，逐项自检

@@ -1,14 +1,16 @@
 ---
 name: openclaw-agent-optimize
 slug: openclaw-agent-optimize
-version: 1.0.8
-description: Optimize an OpenClaw agent setup (model routing, context management, delegation, rules, memory). Use when asked about optimizing agents, improving OpenClaw setup, agent best practices, or choosing optimization priorities across cost/quality/reliability.
+version: 1.1.0
+description: Optimize an OpenClaw agent setup (model routing, context management, delegation, rules, memory, token costs). Use when asked about optimizing agents, improving OpenClaw setup, agent best practices, choosing optimization priorities, or reducing token/API costs. Includes token-optimizer toolkit: smart model routing, heartbeat optimization, context pruning, AGENTS.md generation, and multi-provider fallbacks. See also: related_skill 'token-optimizer' for dedicated token cost scripts.
 triggers:
   - optimize agent
   - optimizing agent
   - improve OpenClaw setup
   - agent best practices
   - OpenClaw optimization
+  - reduce token costs
+  - token optimization
 ---
 
 # OpenClaw Agent Optimization

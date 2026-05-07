@@ -1,3 +1,7 @@
+---
+name: weekly-self-review
+description: 每周自省扫描技能。扫描上周 session 日志，识别高频短查询和意图领域，生成技能建议并推送飞书。触发：每周一自动运行、自省扫描、session 日志分析。
+---
 # weekly-self-review
 
 ## 描述

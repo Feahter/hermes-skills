@@ -9,7 +9,7 @@ metadata:
     tags: [planning, plan-mode, implementation, workflow]
     related_skills: [writing-plans, subagent-driven-development]
   combinator:
-    triggers: ['写计划', '制定计划', '规划任务', 'plan模式']
+    triggers: ['写计划', '制定计划', '规划任务', 'plan模式', '写实现计划', 'implementation plan']
 ---
 
 # Plan Mode

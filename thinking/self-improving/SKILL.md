@@ -39,6 +39,24 @@ Workspace setup should add the standard self-improving steering to the workspace
 └── corrections.md     # Last 50 corrections log
 ```
 
+## Signal Confidence Levels (from reflect)
+
+| Confidence | Triggers | Examples |
+|-------------|----------|----------|
+| **HIGH** | Explicit corrections | "never", "always", "wrong", "stop", "the rule is" |
+| **MEDIUM** | Approved approaches | "perfect", "exactly", "that's right", accepted output |
+| **LOW** | Observations | Patterns that worked but not explicitly validated |
+
+## Skill-Worthy Signal Quality Gates
+
+Before promoting a learning to a new skill, all must pass:
+
+- [ ] **Reusable** — Will help with future tasks
+- [ ] **Non-trivial** — Requires discovery, not just docs
+- [ ] **Specific** — Can describe exact trigger conditions
+- [ ] **Verified** — Solution actually worked
+- [ ] **No duplication** — Doesn't exist already
+
 ## Quick Reference
 
 | Topic | File |

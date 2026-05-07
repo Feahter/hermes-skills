@@ -2,9 +2,7 @@
 name: prettier
 description: "Prettier is an opinionated code formatter."
 triggers:
-  - "prettier"
-  - "prettier"
-  - "prettier" if '/' in full else "prettier"
+  - prettier
 source:
   project: prettier/prettier
   url: https://github.com/prettier/prettier

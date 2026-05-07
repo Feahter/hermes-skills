@@ -423,216 +423,8 @@ LaTeX Quality Checklist:
 - [ ] Numbers in text match actual experimental results
 ```
 
-### Step 5.1: Abstract (5-Sentence Formula)
 
-From Sebastian Farquhar (DeepMind):
-
-```
-1. What you achieved: "We introduce...", "We prove...", "We demonstrate..."
-2. Why this is hard and important
-3. How you do it (with specialist keywords for discoverability)
-4. What evidence you have
-5. Your most remarkable number/result
-```
-
-**Delete** generic openings like "Large language models have achieved remarkable success..."
-
-### Step 5.2: Figure 1
-
-Figure 1 is the second thing most readers look at (after abstract). Draft it before writing the introduction.
-
-| Figure 1 Type | When to Use |
-|---------------|-------------|
-| **Method diagram** | New architecture or pipeline |
-| **Results teaser** | One compelling result tells the whole story |
-| **Problem illustration** | The problem is unintuitive |
-| **Conceptual diagram** | Abstract contribution needs visual grounding |
-
-**Rules**: Figure 1 must be understandable without reading any text. The caption alone should communicate the core idea.
-
-### Step 5.3: Introduction (1-1.5 pages max)
-
-Must include:
-- Clear problem statement
-- Brief approach overview
-- 2-4 bullet contribution list (max 1-2 lines each in two-column format)
-- Methods should start by page 2-3
-
-### Step 5.4: Methods
-
-Enable reimplementation:
-- Conceptual outline or pseudocode
-- All hyperparameters listed
-- Architectural details sufficient for reproduction
-- Present final design decisions; ablations go in experiments
-
-### Step 5.5: Experiments & Results
-
-For each experiment, explicitly state:
-- **What claim it supports**
-- How it connects to main contribution
-- What to observe: "the blue line shows X, which demonstrates Y"
-
-Requirements: error bars with methodology, hyperparameter search ranges, compute infrastructure, seed-setting methods.
-
-### Step 5.6: Related Work
-
-Organize methodologically, not paper-by-paper. Cite generously — reviewers likely authored relevant papers.
-
-### Step 5.7: Limitations (REQUIRED)
-
-All major conferences require this. Honesty helps:
-- Reviewers are instructed not to penalize honest limitation acknowledgment
-- Pre-empt criticisms by identifying weaknesses first
-- Explain why limitations don't undermine core claims
-
-### Step 5.8: Conclusion
-
-- Restate the contribution in one sentence (different wording from abstract)
-- Summarize key findings (2-3 sentences, not a list)
-- Implications: what does this mean for the field?
-- Future work: 2-3 concrete next steps
-
-**Do NOT** introduce new results or claims in the conclusion.
-
-### Writing Style
-
-**Gopen & Swan's 7 Principles**:
-
-| Principle | Rule |
-|-----------|------|
-| Subject-verb proximity | Keep subject and verb close |
-| Stress position | Place emphasis at sentence ends |
-| Topic position | Put context first, new info after |
-| Old before new | Familiar info → unfamiliar info |
-| One unit, one function | Each paragraph makes one point |
-| Action in verb | Use verbs, not nominalizations |
-| Context before new | Set stage before presenting |
-
-**Word choice**:
-- Be specific: "accuracy" not "performance"
-- Eliminate hedging: drop "may" unless genuinely uncertain
-- Consistent terminology throughout
-
-See [references/writing-guide.md](references/writing-guide.md) for full explanations with examples.
-
-### Professional LaTeX Packages
-
-Add to any paper for professional quality (compatible with all major conference style files):
-
-```latex
-% Typography
-\usepackage{microtype}              % Microtypographic improvements
-
-% Tables
-\usepackage{booktabs}               % Professional table rules
-\usepackage{siunitx}                % Decimal alignment in tables
-
-% Figures
-\usepackage{graphicx}               % Include graphics
-\usepackage{subcaption}             % Subfigures with (a), (b), (c)
-
-% Diagrams
-\usepackage{tikz}                   % Programmable vector diagrams
-\usepackage[ruled,vlined]{algorithm2e}  % Professional pseudocode
-
-% Cross-references
-\usepackage{cleveref}               % Smart references (load AFTER hyperref)
-```
-
-### Template Quick Reference
-
-| Conference | Main File | Style File | Page Limit |
-|------------|-----------|------------|------------|
-| NeurIPS 2025 | `main.tex` | `neurips.sty` | 9 pages |
-| ICML 2026 | `example_paper.tex` | `icml2026.sty` | 8 pages |
-| ICLR 2026 | `iclr2026_conference.tex` | `iclr2026_conference.sty` | 9 pages |
-| ACL 2025 | `acl_latex.tex` | `acl.sty` | 8 pages |
-| AAAI 2026 | `aaai2026-unified-template.tex` | `aaai2026.sty` | 7 pages |
-
-Templates in `templates/` directory. See [templates/README.md](templates/README.md) for compilation instructions.
-
-### Tables and Figures
-
-**Tables** — use `booktabs`:
-
-```latex
-\begin{tabular}{lcc}
-\toprule
-Method & Accuracy $\uparrow$ & Latency $\downarrow$ \\
-\midrule
-Baseline & 85.2 & 45ms \\
-\textbf{Ours} & \textbf{92.1} & 38ms \\
-\bottomrule
-\end{tabular}
-```
-
-**Figures**:
-- **Vector graphics** (PDF) for all plots: `plt.savefig('fig.pdf')`
-- **Colorblind-safe palettes** (Okabe-Ito or Paul Tol)
-- Verify **grayscale readability**
-- **Self-contained captions** — reader should understand without main text
-
-### latexdiff for Revision Tracking
-
-Essential for rebuttals — generates marked-up PDF showing changes:
-
-```bash
-latexdiff paper_v1.tex paper_v2.tex > paper_diff.tex
-pdflatex paper_diff.tex
-
-# For multi-file projects
-latexdiff --flatten paper_v1.tex paper_v2.tex > paper_diff.tex
-```
-
-### SciencePlots for Publication-Quality Figures
-
-```bash
-pip install SciencePlots
-```
-
-```python
-import matplotlib.pyplot as plt
-import scienceplots
-
-with plt.style.context(['science', 'no-latex']):
-    fig, ax = plt.subplots(figsize=(3.5, 2.5))  # Single-column
-    ax.plot(x, y, label='Ours', color='#0072B2')
-    fig.savefig('paper/fig_results.pdf', bbox_inches='tight')
-```
-
-**Standard figure sizes**: Single column: `(3.5, 2.5)`, Double column: `(7.0, 3.0)`
-
-### Ethics & Broader Impact Statement
-
-Most venues require this. **What to include**:
-
-| Component | Content | Required By |
-|-----------|---------|-------------|
-| **Positive societal impact** | How your work benefits society | NeurIPS, ICML |
-| **Potential negative impact** | Misuse risks, specific failure modes | NeurIPS, ICML |
-| **Environmental impact** | Compute carbon footprint | ICML, NeurIPS |
-| **LLM disclosure** | Was AI used? | ICLR (mandatory), ACL |
-
-**Common mistakes**:
-- Writing "we foresee no negative impacts" (almost never true)
-- Being vague: "this could be misused" without specifying how
-- Forgetting to disclose LLM use at venues that require it
-
-### Page Budget Management
-
-When over the page limit:
-
-| Cut Strategy | Saves | Risk |
-|-------------|-------|------|
-| Move proofs to appendix | 0.5-2 pages | Low |
-| Condense related work | 0.5-1 page | Medium |
-| Combine tables with subfigures | 0.25-0.5 page | Low |
-| Reduce figure sizes | 0.25-0.5 page | High |
-
-**Do NOT**: reduce font size, change margins, or remove required sections (limitations, broader impact).
-
----
+> **📖 Section-by-section drafting guidance** → [references/phase5-drafting.md](references/phase5-drafting.md) (§ Step-by-Step Drafting)
 
 ## Phase 6: Self-Review & Revision
 
@@ -827,18 +619,26 @@ Schedule periodic checks with `[SILENT]` protocol when nothing changed. Use dead
 
 ## Reference Documents
 
+> Heavy sections moved to reference files. SKILL.md now focused on execution flow.
+
 | Document | Contents |
 |----------|----------|
-| [references/phase5-drafting.md](references/phase5-drafting.md) | **NEW: Full Phase 5 guide** — LaTeX templates, figures, tables, TikZ, latexdiff, SciencePlots, section-by-section drafting |
-| [references/writing-guide.md](references/writing-guide.md) | Gopen & Swan 7 principles, Lipton word choice, Steinhardt precision, figure design |
-| [references/citation-workflow.md](references/citation-workflow.md) | Citation APIs, CitationManager class |
-| [references/checklists.md](references/checklists.md) | NeurIPS, ICML, ICLR, ACL requirements |
-| [references/reviewer-guidelines.md](references/reviewer-guidelines.md) | Evaluation criteria, scoring, rebuttal template |
-| [references/sources.md](references/sources.md) | Complete bibliography |
-| [references/experiment-patterns.md](references/experiment-patterns.md) | Design patterns, McNemar's test, bootstrapped CIs |
-| [references/autoreason-methodology.md](references/autoreason-methodology.md) | Autoreason loop, prompts, Borda scoring |
-| [references/human-evaluation.md](references/human-evaluation.md) | Annotation guidelines, agreement metrics, IRB guidance |
-| [references/paper-types.md](references/paper-types.md) | Theory, survey, benchmark, position papers |
+| `references/phase5-drafting.md` | LaTeX templates, packages, SciencePlots, latexdiff, tables, figures, page budget |
+| `references/writing-style.md` | Gopen & Swan 7 principles, word choice, academic style |
+| `references/citation-workflow.md` | Citation APIs, CitationManager class |
+| `references/checklists.md` | NeurIPS, ICML, ICLR, ACL submission checklists |
+| `references/reviewer-guidelines.md` | Evaluation criteria, scoring rubric, rebuttal template |
+| `references/experiment-patterns.md` | Design patterns, McNemar's test, bootstrapped CIs |
+| `references/autoreason-methodology.md` | Autoreason loop, prompts, Borda scoring |
+| `references/human-evaluation.md` | Annotation guidelines, Krippendorff's alpha |
+| `references/paper-types.md` | Theory, survey, benchmark, position papers |
+| `references/sources.md` | Complete bibliography |
+
+### LaTeX Templates
+
+Templates in `templates/` for: **NeurIPS 2025**, **ICML 2026**, **ICLR 2026**, **ACL**, **AAAI 2026**, **COLM 2025**.
+
+See [templates/README.md](templates/README.md) for compilation instructions.
 
 ### LaTeX Templates
 

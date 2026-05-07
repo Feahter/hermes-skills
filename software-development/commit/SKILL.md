@@ -1,3 +1,7 @@
+---
+name: commit
+description: 智能生成 git commit message，支持 Conventional Commits 格式。当需要生成 commit message、填写 git 提交信息时触发。
+---
 # commit skill
 
 智能生成 git commit message，支持 Conventional Commits 格式。

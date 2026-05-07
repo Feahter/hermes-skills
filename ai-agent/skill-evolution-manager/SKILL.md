@@ -112,7 +112,8 @@ AI: → 运行 align_all.py
 | **不直接修改正文** | 所有修正通过 `evolution.json`，避免升级丢失 |
 | **多 Skill 协同** | 一次对话涉及多个 Skill，依次复盘 |
 | **及时复盘** | 发现问题立即复盘，不要等到对话结束 |
-| **结构化反馈** | 尽量提取可操作的偏好和修复 |
+| **小 bug 立即修** | 在实现过程中发现 bug（如 word boundary 误匹配），当场修掉，不需要单独开 issue 或 TODO |
+| **立即执行优于事后归档** | 当用户说"做"时，直接 patch + 验证，复杂的 evolution.json 流程适合多人协作，单 agent 自己进化时直接 in-place 更新更高效 |
 
 ## 经验 JSON Schema
 
@@ -138,3 +139,10 @@ AI: → 运行 align_all.py
 - `evolution.json` 独立于原仓库，不被 `skill-manager` 更新覆盖
 - `align_all.py` 用于版本升级后的经验还原
 - 保持 JSON 结构简洁，避免过度定制
+
+## Pitfalls
+
+- **Hygiene 误判（本次最大教训）**：名称/描述表面相似 ≠ 实际重叠。talent-mind 分析常发现大量"潜在合并/删除项"，但读文件后发现多数是误判——如 create vs modify（角色不同）、纵向钻取 vs 横向分析（目的不同）、中文 vs 英文（触发场景不同）。** Hygiene 工作流必须强制读文件验证，不能跳过直接执行分析结果。**
+- **推断误差**：自动推断不准确时，在 SKILL.md 加显式声明
+- **反馈噪声**：`~/.hermes/.skill_combinator_feedback.json` 长期积累后 task_key 前缀匹配可能不准，可定期清理
+- **Subagent 模型路由不验证**：`delegate_task` 的 `model` 参数不校验模型 ID 是否存在于 provider，指定无效 model ID 时静默降级到默认模型

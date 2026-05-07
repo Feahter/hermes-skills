@@ -191,109 +191,10 @@ User: "Review this paper"
 
 ---
 
-## Re-Review Mode (Added in v1.1 — Verification Review)
 
-Re-review mode is the dedicated mode for Pipeline Stage 3', designed to **verify whether revisions address the first-round review comments**.
+## Re-Review Mode (Verification Review)
 
-### How It Works
-
-```
-Input:
-1. Original Revision Roadmap (Stage 3 output)
-2. Revised manuscript
-3. Response to Reviewers (optional)
-
-Phase 0: Reads the Revision Roadmap, builds a checklist
-Phase 1: EIC checks each item (other reviewers not activated)
-Phase 2: Editorial Synthesis -> New Decision
-```
-
-### Verification Logic
-
-```
-For each item in the Revision Roadmap:
-
-Priority 1 (Required):
-  -> Check each item for corresponding changes in the revised manuscript
-  -> Assess revision quality (FULLY_ADDRESSED / PARTIALLY_ADDRESSED / NOT_ADDRESSED / MADE_WORSE)
-  -> All Priority 1 items must be FULLY_ADDRESSED for Accept
-
-Priority 2 (Suggested):
-  -> Check each item
-  -> At least 80% should have a response
-  -> NOT_ADDRESSED items require author explanation
-
-Priority 3 (Nice to Fix):
-  -> Check but does not affect Decision
-```
-
-### New Issue Detection
-
-```
-In addition to checking old items, EIC also scans for:
-- Whether content added during revision introduces new problems
-- Whether newly added references are correct (but deep verification is left to Stage 4.5 integrity check)
-- Whether revisions cause inconsistencies
-```
-
-### Socratic Guidance After Re-Review
-
-```
-If Re-Review Decision = Major Revision:
-  -> Activate Residual Coaching (residual issue guidance)
-  -> EIC guides user through Socratic dialogue:
-    1. Gap analysis — "How many issues did the first round of revisions resolve? Why are the remaining ones hard to address?"
-    2. Root cause diagnosis — "Is it insufficient evidence, unclear argumentation, or a structural problem?"
-    3. Trade-off decisions — "Which ones can be marked as research limitations?"
-    4. Action plan — Plan revision approach for each residual issue
-  -> Maximum 5 rounds of dialogue
-  -> User can say "just fix it" to skip guidance
-```
-
-### Re-Review Output Format
-
-```markdown
-# Verification Review Report
-
-## Decision
-[Accept / Minor Revision / Major Revision]
-
-## Revision Response Checklist
-
-### Priority 1 — Required Revisions
-
-| # | Original Review Comment | Response Status | Revision Location | Quality Assessment |
-|---|------------------------|-----------------|-------------------|-------------------|
-| R1 | [Original text] | FULLY_ADDRESSED | Section X.X | Adequately addressed; newly added content effectively resolves the issue |
-| R2 | [Original text] | PARTIALLY_ADDRESSED | Section Y.Y | Partially addressed, but still missing [specific gap] |
-
-### Priority 2 — Suggested Revisions
-
-| # | Original Review Comment | Response Status | Notes |
-|---|------------------------|-----------------|-------|
-| S1 | [Original text] | FULLY_ADDRESSED | -- |
-| S2 | [Original text] | NOT_ADDRESSED | Author explanation: [reason] |
-
-### Priority 3 — Nice to Fix
-
-| # | Original Review Comment | Response Status |
-|---|------------------------|-----------------|
-| N1 | [Original text] | FULLY_ADDRESSED |
-
-## New Issues (Discovered During Revision)
-
-| # | Type | Location | Description |
-|---|------|----------|-------------|
-| NEW-1 | [Type] | Section X.X | [Description] |
-
-## Decision Rationale
-[Rationale based on the checklist]
-
-## Residual Issues (If Any)
-[List unresolved items, suggest marking as Acknowledged Limitations]
-```
-
----
+> 详细内容 → [references/re-review-mode.md](references/re-review-mode.md)（验证逻辑、新问题检测、Socratic指导）
 
 ## Guided Mode (Socratic Guided Review)
 
@@ -328,20 +229,10 @@ Phase 2: Does not produce full Editorial Decision; enters dialogue mode instead
 
 ---
 
-## Review Output Format
 
-Each reviewer's report structure is detailed in `templates/peer_review_report_template.md`.
+## Guided Mode (Socratic Guided Review)
 
-### Devil's Advocate Report Structure (Special Format)
-
-The Devil's Advocate uses a dedicated format, not the standard reviewer template:
-- **Strongest Counter-Argument** (200-300 words)
-- **Issue List** (categorized as CRITICAL / MAJOR / MINOR, with dimension and location)
-- **Ignored Alternative Explanations/Paths**
-- **Missing Stakeholder Perspectives**
-- **Observations (Non-Defects)**
-
----
+> 详细内容 → [references/guided-mode.md](references/guided-mode.md)（对话流程、对话规则、渐进揭示策略）
 
 ## Editorial Decision Format
 

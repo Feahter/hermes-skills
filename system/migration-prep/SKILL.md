@@ -1,3 +1,7 @@
+---
+name: migration-prep
+description: OpenClaw → Hermes 迁移风险评估工具。分析 ~/.openclaw/ 目录结构，识别迁移风险，生成检查清单。在决定是否迁移 Hermes 前必读。
+---
 # migration-prep
 
 ## 描述
