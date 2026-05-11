@@ -126,6 +126,109 @@ AI: → 运行 align_all.py
 }
 ```
 
+## 与 experiment-logger 的联动 (Phase 2)
+
+skill-evolution-manager 负责"经验提炼 + 写入 SKILL.md"，experiment-logger 负责"数据采集 + 质量追踪"。
+
+### 联动流程
+
+```
+用户反馈
+    ↓
+skill-evolution-manager: 分析反馈，提取经验
+    ↓
+experiment-logger: 记录 quality_signals
+    ↓
+fail_cases 积累 → 触发 regression_generator
+    ↓
+回归测试失败 → skill-evolution-manager 提示需要进化
+```
+
+### 联动触发词
+
+- "复盘并记录" - 同时调用两者
+- "生成本 skill 的回归测试" - experiment-logger 生成，evolution-manager 审核
+- "这个 skill 变好了吗" - experiment-logger 对比回归测试结果
+
+## Phase 0: 冷启动 - 种子数据生成
+
+当 skill 调用记录 < 5 条时，boundary 签名无法可靠生成（数据不足）。此时需要主动注入种子数据，而非等待真实使用积累。
+
+### 冷启动流程
+
+```
+新 skill 或数据不足
+    ↓
+扫描 SKILL.md 的触发场景关键词
+    ↓
+基于触发场景生成真实格式的调用记录
+    ↓
+写入 invocations/ 目录
+    ↓
+boundary_detector.scan() 从种子数据学习边界
+    ↓
+后续真实使用覆盖种子数据（无侵入）
+```
+
+### 种子生成脚本
+
+`~/.hermes/skills/.experiment_log/scripts/seed_generator.py`（由 experiment-logger Phase 3 提供）：
+
+```bash
+# 生成单个 skill 的种子数据（默认5条）
+python3 ~/.hermes/skills/.experiment_log/skills_feedback.py --seed <skill_name>
+
+# 批量生成所有无数据 skills 的种子
+python3 ~/.hermes/skills/.experiment_log/skills_feedback.py --seed-all
+
+# 查看当前数据状态
+python3 ~/.hermes/skills/.experiment_log/skills_feedback.py --stats
+```
+
+### 触发条件
+
+- 新安装 skill 且无调用记录
+- 现有 skill 调用记录 < 5 条
+- boundary 签名缺失（`boundary_detector.check_risk()` 返回 `"boundary_data": false`）
+
+### 注意事项
+
+- 种子数据是"保底"而非"真实"，用于冷启动
+- 真实使用数据会自然覆盖种子（通过 `query_hash` 去重）
+- 不要对种子数据做 A/B 测试（mock executor 无法执行业务逻辑）
+
+## 与 experiment-logger 的联动 (Phase 3)
+
+Phase 3 将 boundary_detector 集成到 skill-orchestrator 的路由层，形成预防性反馈回路：
+
+```
+用户请求
+    ↓
+skill-orchestrator 选 skill
+    ↓
+boundary_detector.check_risk(skill, query)  ← 前置拦截
+    ↓
+HIGH 风险 → 跳过 + 切换备选 skill
+MEDIUM 风险 → 警告 + 用户确认
+LOW 风险 → 直接执行
+    ↓
+执行结果 → experiment-logger 记录
+    ↓
+boundary_detector.scan() 从新数据中更新边界签名
+    ↓
+下次请求时使用更准确的边界
+```
+
+**关键区别：**
+- Phase 2：被动反应（失败后复盘）
+- Phase 3：主动预防（失败前拦截）
+
+### Phase 3 联动触发词
+
+- "检查这个 skill 的风险" → boundary_detector.check_risk
+- "扫描 skill 的边界" → boundary_detector.scan
+- "完整闭环" → skills_feedback.py --full-loop
+
 ## 与其他 Skill 配合
 
 | 场景 | 流程 |

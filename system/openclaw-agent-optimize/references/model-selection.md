@@ -35,17 +35,17 @@ If you need user approval to change a global default, ask. Otherwise prefer loca
 
 ## OpenRouter 模型推荐（动态更新）
 
-> ⚠️ 以下为静态快照，实际以 cron 自动更新为准。上次更新：2026-04-27
+> ⚠️ 以下为静态快照，实际以 cron 自动更新为准。上次更新：2026-05-11
 > 自动更新 cron：`openrouter-model-refresh`（每周一 09:00 Asia/Shanghai）
 
 ### 推荐分层（按场景）
 
 | 层级 | 场景 | 推荐模型 | 理由 |
 |------|------|----------|------|
-| **免费主力** | 通用 Agent、编程、推理 | `inclusionai/ling-2.6-flash:free` | 146B tokens验证，262K context，高效响应 |
-| **免费备选** | 需要更大 context | `nvidia/nemotron-3-super-120b-a12b:free` | 655B tokens验证，262K/1M context，AIME/SWE-Bench SOTA |
-| **免费编程** | 代码生成/调试 | `minimax/minimax-m2.5:free` | SWE-Bench 80.2%，编程 SOTA，新晋 |
-| **免费大context** | 长文档/视觉 | `google/gemma-4-31b-it:free` | 262K context，140+语言，多模态 |
+|  **免费主力** | 通用 Agent、编程、推理 | `inclusionai/ring-2.6-1t:free` | 564B tokens验证（总榜#5），262K context，高效响应，MoE 1T/63B active |
+| **免费备选** | 需要更大 context | `nvidia/nemotron-3-super-120b-a12b:free` | 564B tokens验证（总榜#1），262K/1M context，AIME/SWE-Bench SOTA |
+| **免费编程** | 代码生成/调试 | `minimax/minimax-m2.5:free` | SWE-Bench 80.2%，197K context，编程 SOTA，新晋 |
+| **免费大context** | 长文档/视觉 | `openrouter/owl-alpha:free` | 1.05M context（免费最高），工具调用，Agentic 兼容 Claude Code/OpenClaw |
 | **免费综合** | Router自动选最优 | `openrouter/free` | 根据请求类型自动路由 |
 | **付费旗舰** | 高难度推理/架构 | `openai/gpt-5.5` 或 `anthropic/claude-opus-4.7` | GPT-5.5: 1.05M context；Claude: 复杂代码库/多阶段调试 |
 | **付费性价比** | 编程+Agent | `deepseek/deepseek-v4-flash` | $0.14/$0.28 per 1M tokens，MoE 284B |
@@ -54,10 +54,10 @@ If you need user approval to change a global default, ask. Otherwise prefer loca
 
 | 模型 | Input | Output | Notes |
 |------|-------|--------|-------|
-| ling-2.6-flash | $0 (免费) | $0 (免费) | 免费主力 |
+| ring-2.6-1t | $0 (免费) | $0 (免费) | 免费主力，MoE 1T/63B active |
 | nemotron-3-super | $0 | $0 | 免费备选，NVIDIA开源 |
-| minimax-m2.5 | $0 | $0 | 免费编程，新晋 |
-| gemma-4-31b | $0 | $0 | 免费大context |
+| minimax-m2.5 | $0 | $0 | 免费编程，SWE-Bench 80.2% |
+| owl-alpha | $0 | $0 | 免费大context，1.05M context |
 | deepseek-v4-flash | $0.14 | $0.28 | 付费性价比首选 |
 | gpt-5.5 | $5 | $30 | 付费旗舰，1.05M context |
 | claude-opus-4.7 | $5 | $25 | 旗舰，全能 |
@@ -66,7 +66,7 @@ If you need user approval to change a global default, ask. Otherwise prefer loca
 
 ```
 任务类型 = 轻量任务(cron/heartbeat/format)?
-└→ openrouter/free 或 ling-2.6-flash:free
+└→ openrouter/free 或 ring-2.6-1t:free
 
 任务类型 = 编程/Agent?
 ├─ 需要最高性价比 → minimax-m2.5:free
@@ -74,7 +74,8 @@ If you need user approval to change a global default, ask. Otherwise prefer loca
 └─ 需要最高正确率 → claude-opus-4.7
 
 任务类型 = 长文档/大context(>200K)?
-└→ gemma-4-31b-it:free (262K) 或 nemotron-3-super:free (1M)
+├─ 需要最高免费context → owl-alpha:free (1.05M)
+└→ nemotron-3-super:free (1M context)
 
 任务类型 = 高难度推理/架构?
 └→ gpt-5.5 或 claude-opus-4.7
@@ -87,7 +88,8 @@ If you need user approval to change a global default, ask. Otherwise prefer loca
 - 🚫 不要用 claude-opus-4.* / gpt-5.5 做 cron/heartbeat（成本 $5-30 per 1M）
 - 🚫 不要在免费模型返回 429 时盲目重试（rate limit），等1分钟或换模型
 - 🚫 不要用 GPT-OSS 120B 做长对话（131K context，容易超限）
-- ⚠️ Ling-2.6-1T 将于 2026-04-30 下线，请切换到 ling-2.6-flash
+- 🚫 不要用 owl-alpha 做简单格式化任务（1.05M context 预热慢，适合复杂任务）
+- ⚠️ ling-2.6-flash 已下线（免费期结束），请切换到 ring-2.6-1t:free
 
 ---
 

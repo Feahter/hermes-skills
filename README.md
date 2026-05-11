@@ -1,40 +1,40 @@
 # hermes-skills
 
-> AI Agent Skills Collection · **167 skills** across **21 categories** · 2026-04-27
+> AI Agent Skills Collection · **181 skills** across **21 categories** · 2026-05-11
 
 ## Overview
 
 | Metric | Value |
 |--------|-------|
-| Total Skills | 167 |
+| Total Skills | 181 |
 | Categories | 21 |
-| Updated | 2026-04-27 |
+| Updated | 2026-05-11 |
 
 ## Categories
 
 | Category | Count |
 |---------|-------|
-| 🤖 `ai-agent` | 14 |
-| 🍎 `apple` | 4 |
+| 🤖 `ai-agent` | 13 |
+| 🍎 `apple` | 1 |
 | 🧠 `autonomous-ai-agents` | 4 |
-| 🎨 `creative` | 11 |
+| 🎨 `creative` | 21 |
 | 🔬 `data-science` | 6 |
-| ⚙️ `devops` | 5 |
-| 📧 `email` | 3 |
-| 🎮 `gaming` | 1 |
+| ⚙️ `devops` | 7 |
+| 📧 `email` | 2 |
+| 🎮 `gaming` | 0 |
 | 🐙 `github` | 1 |
 | 🔌 `mcp` | 1 |
 | 🖼️ `media` | 8 |
 | 🚀 `mlops` | 3 |
 | 📝 `note-taking` | 4 |
-| ⚡ `productivity` | 25 |
-| 🔍 `research` | 13 |
-| 🏠 `smart-home` | 1 |
-| 📱 `social-media` | 1 |
-| 💻 `software-development` | 24 |
-| 🖥️ `system` | 14 |
-| 🧩 `thinking` | 15 |
-| ✍️ `writing` | 9 |
+| ⚡ `productivity` | 23 |
+| 🔍 `research` | 11 |
+| 🏠 `smart-home` | 0 |
+| 📱 `social-media` | 0 |
+| 💻 `software-development` | 31 |
+| 🖥️ `system` | 15 |
+| 🧩 `thinking` | 14 |
+| ✍️ `writing` | 8 |
 
 ### 🤖 ai-agent
 

@@ -6,9 +6,10 @@ description: 技能编排 — 分析需求调用最合适skill。触发：需要
   **核心能力:**
   1. **需求解析** - 分析用户描述，识别需要的技能组合
   2. **自动发现** - 搜索技能生态，找到最佳匹配
-  3. **自动安装** - 无缝安装缺失的技能
-  4. **智能执行** - 调用合适的技能完成任务
-  5. **模型调度** - 当前模型受限时，自动切换可用模型
+  3. **边界风险检查** - 基于历史数据过滤高风险场景（Phase 3 集成）
+  4. **自动安装** - 无缝安装缺失的技能
+  5. **智能执行** - 调用合适的技能完成任务
+  6. **模型调度** - 当前模型受限时，自动切换可用模型
   
   **触发场景:**
   - 用户描述任务但不确定用什么技能
@@ -37,6 +38,8 @@ description: 技能编排 — 分析需求调用最合适skill。触发：需要
     ↓
 [2] 技能匹配 - 发现/确认所需技能
     ↓
+[2.5] 边界风险检查 - 基于历史数据过滤高风险场景  ← Phase 3
+    ↓
 [3] 自动安装 - 安装缺失技能
     ↓
 [4] 模型选择 - 选择最佳执行模型
@@ -44,6 +47,28 @@ description: 技能编排 — 分析需求调用最合适skill。触发：需要
 [5] 任务分发 - 执行子任务
     ↓
 [6] 结果整合 - 合并输出
+    ↓
+[7] 日志记录 - experiment-logger 记录调用（Phase 1 可观测性）
+```
+
+**日志集成 (Phase 1):**
+
+执行任务分发时，同步调用 experiment-logger 记录：
+
+```bash
+# 任务开始时记录
+python3 ~/.hermes/skills/.experiment_log/skill_logger.py \
+  --start \
+  --skill <skill_name> \
+  --query "<用户需求>" \
+  --channel <来源渠道>
+
+# 任务结束时记录
+python3 ~/.hermes/skills/.experiment_log/skill_logger.py \
+  --end \
+  --inv-id <返回的ID> \
+  --success \
+  --output <输出摘要>
 ```
 
 ## 步骤详解
@@ -70,12 +95,67 @@ ls skills/
 ```bash
 # 使用 skillhub_install 工具（推荐）
 # 工具会自动处理环境检测、依赖安装、CLI 安装
+skillhub_install(action="install_skill", skillName="pdf")
 ```
+
+**重要说明：**
+- `skillhub_install` 工具会自动处理所有依赖环境
+- 无需手动检查 python、curl、bash 版本
+- 无需执行 curl、npx skills、pip install 等终端命令
+- 工具内部会自动完成：环境检测 → 依赖安装 → CLI 安装 → 技能安装
+
+### 2.5. 边界风险检查（Phase 3 集成）
+
+**目的：** 在任务分发前过滤已知高风险场景，基于 feedback loop 历史数据自动规避失败模式。
+
+**集成方式：** 在技能匹配后、任务分发前，调用 boundary_detector 检查风险：
+
+```python
+import sys
+sys.path.insert(0, '~/.hermes/skills/.experiment_log')
+from boundary_detector import BoundaryDetector
+
+bd = BoundaryDetector()
+risky_skills = []
+
+for skill in matched_skills:
+    result = bd.check_risk(skill, query)
+    
+    if result['risk_level'] == 'HIGH':
+        # 跳过该 skill，启用备选
+        risky_skills.append({
+            'skill': skill,
+            'risk': result,
+            'action': 'skip_and_switch',
+        })
+    elif result['risk_level'] == 'MEDIUM':
+        # 记录警告，但不断开
+        risky_skills.append({
+            'skill': skill,
+            'risk': result,
+            'action': 'warn_but_proceed',
+        })
+    # LOW / unknown: 直接执行，静默记录
+```
+
+**风险处理策略：**
+
+| 风险等级 | 策略 | 行为 |
+|---------|------|------|
+| HIGH | 跳过 + 切换备选 skill | `alternative_skill` 存在时自动切换；否则提示用户 |
+| MEDIUM | 警告 + 用户确认 | 输出 `risk_reasons` 和 `suggestions`，等待用户决定是否继续 |
+| LOW / unknown | 直接执行 | 静默通过 |
+
+**alternative_skill 备选逻辑：**
+- boundary 签名中 `alternative_skill` 字段指定备选
+- 备选 skill 同样经过风险检查
+- 无备选时输出 `suggestions` 供用户参考
+
+**日志记录：** 每次 boundary 检查结果自动写入 `boundaries/` 目录，无需额外操作。
 
 ### 3. 自动安装
 
 **使用 skillhub_install 工具（一步到位）：**
-
 ```python
 # 推荐方式：直接调用工具
 # 工具会自动检测环境、安装依赖（Python3/curl等）、安装 CLI
@@ -252,3 +332,4 @@ pipeline = [
 4. **回退:** 编排失败时回退到基础能力
 5. **重试:** 网络错误自动重试，最多 3 次
 6. **日志:** 记录所有安装和执行错误，便于排查
+7. **可观测性:** 每次编排执行后，同步调用 experiment-logger 记录调用和结果（见上方日志集成）
