@@ -30,7 +30,7 @@
 | ⚡ `productivity` | 23 |
 | 🔍 `research` | 11 |
 | 🏠 `smart-home` | 0 |
-| 📱 `social-media` | 0 |
+| 📱 `social-media` | 1 |
 | 💻 `software-development` | 31 |
 | 🖥️ `system` | 15 |
 | 🧩 `thinking` | 14 |
@@ -224,6 +224,7 @@
 
 | Skill | Description | Triggers |
 |-------|-------------|---------|
+| `hermes-tweet` | Use Hermes Tweet from Hermes Agent to search tweets, search X/Twitter, read tweet replies, monitor tweets, post tweets, post replies, send DMs, run extraction jobs, and automate X actions through Xquik. |  |
 | `xurl` | Interact with X/Twitter via xurl, the official X API CLI. Use for posting, replying, quoting, searching, timelines, m... |  |
 
 ### 💻 software-development
