@@ -1,7 +1,7 @@
 ---
 name: skill-combinator
 description: Skills 组合涌现引擎 — 根据任务特征自动发现、排序、组合 skills。触发：多 skill 协作需求、复杂任务分解、技能选型决策。
-version: 1.7.0
+version: 1.7.1
 author: Hermes Agent
 metadata:
   combinator:
@@ -34,7 +34,35 @@ record_feedback(task="分析代码", chosen=["code-review-expert"], rejected=["s
 
 **用法**：当用户纠正或确认 skill 组合时，模型调用 `record_feedback()` 记录。
 
-### 2. 复杂度门槛（零开销优化）
+### 2. 真实调用数据加权（Plan A, v7.1）
+
+Stage 1 末尾调用 `get_real_invocation_stats()`，用 experiment-logger 的真实成功率对候选 skill 做 boost：
+
+```
+boost = (success_rate - 0.5) * 4
+成功 100% → +2.0,  成功 50% → 0,  成功 0% → -2.0
+```
+
+**数据来源**：`~/.hermes/skills/.experiment_log/invocations/` 下的 77 条记录（70 seed + 7 真实）
+
+**协作链 boost**：同一 query 的多次调用视为协作链，在 co-occurring skills 之间互相 +0.5 分
+
+**副作用防护**：
+- `min_samples=1`：至少 1 条真实记录才 boost，避免冷启动被 seed 数据污染
+- Lazy load + 5 分钟 cache：避免每次 discover 重复读文件
+- 路径固定为 `skills/.experiment_log`，不依赖 skill 层级（正确）
+
+**当前覆盖**：16/193 skills 有真实调用数据，其余 177 个无 boost
+
+```python
+# 示例效果
+skill-evolution-manager: score 8 → 10.0 (真实成功率 100%)
+skill-combinator:       score 9 → 9.4  (真实成功率 60%)
+tavily-search:          score 2 → 3.2  (真实成功率 80%)
+neat-freak:             score 6 → 5.6  (真实成功率 40%)
+```
+
+### 3. 复杂度门槛（零开销优化）
 
 | 条件 | 行为 |
 |------|------|
@@ -50,7 +78,7 @@ record_feedback(task="分析代码", chosen=["code-review-expert"], rejected=["s
 - `代码审查/code review` → `code-review-expert`
 - `计划` → `plan`
 
-### 3. Trigger Registry 化
+### 4. Trigger Registry 化
 
 Stage 1 硬编码 if-elif → `TRIGGER_STRATEGIES` 配置列表，可扩展免改代码：
 
@@ -216,7 +244,12 @@ python3 ~/.hermes/skills/system/skill-combinator/scripts/pipeline.py "多skill�
 | github 搜索最佳实践 | bypass github | ✅ | github |
 | 代码审查 | bypass 直连 | ✅ | code-review-expert |
 
-**v7 新增验证**（2026-05-04）：
+**v7.1 新增验证**（Plan A, 2026-05-15）：
+- 真实数据 boost：`skill-evolution-manager` 100% → +2.0 boost ✅
+- 协作链 boost：`markdown-prettier ↔ neat-freak` co-occurrence ✅
+- 路径固定：`skills/.experiment_log` 正确解析 ✅
+- Lazy load + 5min cache：无重复文件 I/O ✅
+- 冷启动安全：`min_samples=1` 才触发 boost ✅
 - 复杂度门槛：`"代码审查"` → bypass ✅，长任务 → pipeline ✅
 - 反馈加权：`record_feedback()` → `apply_feedback()` +0.5/-0.5 ✅
 - Word boundary：GitHub 不误匹配 git ✅

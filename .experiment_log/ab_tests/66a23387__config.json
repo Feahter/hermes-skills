@@ -1,0 +1,18 @@
+{
+  "test_id": "66a23387",
+  "test_name": "coding-agent vs claude-code",
+  "skill_a": "coding-agent",
+  "skill_b": "claude-code",
+  "queries": [
+    "帮我写一个快速排序",
+    "分析这段代码的性能瓶颈",
+    "帮我优化这个 SQL 查询",
+    "翻译这段英文到中文",
+    "总结这篇论文的主要内容"
+  ],
+  "version_a": "v1",
+  "version_b": "v2",
+  "metric": "quality",
+  "mode": "parallel",
+  "created_at": "2026-05-11T12:45:32.897365"
+}

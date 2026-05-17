@@ -158,6 +158,70 @@ def complexity_gate(task: str) -> dict:
     return {"bypass": False, "skill": None, "reason": "no single-skill trigger"}
 
 
+# ─── Plan A: 真实数据加权（lazy load）────────────────────────────
+# 避免每次 discover 都读文件，cache 5 分钟
+_real_stats_cache: dict | None = None
+_real_stats_ts: float = 0
+_REAL_STATS_TTL = 300  # 5分钟
+
+
+def _get_real_stats() -> dict:
+    global _real_stats_cache, _real_stats_ts
+    import time
+    now = time.time()
+    if _real_stats_cache is None or (now - _real_stats_ts) > _REAL_STATS_TTL:
+        from pathlib import Path
+        import sys
+        exp_dir = Path(__file__).parent.parent.parent.parent / ".experiment_log"
+        sys.path.insert(0, str(exp_dir))
+        try:
+            from skill_logger import SkillLogger
+            logger = SkillLogger()
+            _real_stats_cache = logger.get_real_invocation_stats(min_samples=1)
+            _real_stats_ts = now
+        except Exception:
+            _real_stats_cache = {}
+    return _real_stats_cache
+
+
+def _get_cooccurrence() -> dict:
+    from pathlib import Path
+    import sys
+    exp_dir = Path(__file__).parent.parent.parent / ".experiment_log"
+    sys.path.insert(0, str(exp_dir))
+    try:
+        from skill_logger import SkillLogger
+        logger = SkillLogger()
+        return logger.get_skill_cooccurrence()
+    except Exception:
+        return {}
+
+
+def _apply_real_data_boost(scores: dict, task: str) -> dict:
+    """
+    Plan A: 用真实调用成功率对候选 skill 做 boost。
+    boost = (success_rate - 0.5) * 4
+    成功100% → +2,  成功率0% → -2,  成功率50% → 0
+    """
+    real_stats = _get_real_stats()
+    cooccur = _get_cooccurrence()
+
+    for name in scores:
+        stat = real_stats.get(name)
+        if stat:
+            # 成功率 boost
+            boost = (stat["success_rate"] - 0.5) * 4
+            scores[name] += boost
+
+        # 协作链 boost：如果 co-occurring skill 也在候选里，互相加分
+        coskills = cooccur.get(name, [])
+        for co in coskills:
+            if co in scores:
+                scores[name] += 0.5
+
+    return scores
+
+
 # ─── Stage 1：搜索索引（纯内存，无 I/O）───────────────────────
 def stage1_search_index(task: str, skills: dict, top_k: int = 20) -> list[tuple]:
     """
@@ -204,6 +268,9 @@ def stage1_search_index(task: str, skills: dict, top_k: int = 20) -> list[tuple]
 
     # 反馈加权
     scores = apply_feedback(task, scores)
+
+    # Plan A: 真实数据 boost
+    scores = _apply_real_data_boost(scores, task)
 
     return sorted(scores.items(), key=lambda x: -x[1])[:top_k]
 

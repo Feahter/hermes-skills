@@ -219,17 +219,23 @@ macbot bluetooth off
 
 ### Peekaboo（像素级精准操作）
 
-适合无法用 OCR 定位的复杂界面（如验证码、专业设计软件）。
+> peekaboo 基于 Accessibility API 精确定位 UI 元素，无需 OCR。完整文档 → `peekaboo` skill。
+> **必须先 `see --app X --json` 获取 snapshot，再用 `click --on elem_X --snapshot $SNAP`**。
 
 ```bash
-brew install peekaboo
+# 1. 截图 + 获取元素列表
+SNAP=$(peekaboo see --app "MyApp" --json | jq -r '.data.snapshot_id')
 
-# 像素级点击
-peekaboo click --image "button.png"
+# 2. 查看输出中的 element ID（如 elem_19）
+# 3. 点击指定元素
+peekaboo click --on elem_19 --snapshot "$SNAP"
 
-# 等待图像出现再点击
-peekaboo wait-for --image "dialog.png" --timeout 10 && peekaboo click --image "ok.png"
+# 菜单栏/Dock 操作（位置参数，不用 --name）
+peekaboo dock launch Safari
+peekaboo menu list --app Safari
 ```
+
+**权限：Screen Recording + Accessibility 均必须。macOS 15+ only。**
 
 ## L5: Apple 原生应用
 

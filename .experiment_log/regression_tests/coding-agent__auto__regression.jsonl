@@ -1,0 +1,2 @@
+{"type": "regression", "skill": "coding-agent", "query": "用Python写一个异步爬虫，支持代理池和错误重试", "expected_behavior": "should_handle_gracefully", "failure_mode": "timeout", "confidence": "high", "occurrences": 2, "sample_cases": ["case001", "case002"], "generated_at": "2026-05-15T20:01:37.284524"}
+{"type": "regression", "skill": "coding-agent", "query": "写个爬虫，爬取知乎热榜", "expected_behavior": "should_handle_gracefully", "failure_mode": "output_format_error", "confidence": "low", "source_case_id": "case003", "generated_at": "2026-05-15T20:01:37.284547"}

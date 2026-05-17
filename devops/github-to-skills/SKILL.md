@@ -114,7 +114,7 @@ gh issue list --repo owner/repo --json state,title --jq '.[] | select(.state == 
 
 ## 脚本工具
 
-| 脚本 | 用途 |
+| `references/github-push-ssh.md` | SSH fallback 方案：HTTPS push 超时时改用 SSH，附具体命令 |
 |------|------|
 | `scripts/fetch_github_info.py` | 获取仓库信息（README、hash） |
 | `scripts/scan_and_check.py` | 检查 Skills 更新（来自 skill-manager） |

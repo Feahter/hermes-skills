@@ -42,7 +42,17 @@ This step matters — bad eval queries lead to bad descriptions.
 
 ### Step 3: Run the optimization loop
 
-> ⚠️ **Hermes 环境注意**：此 loop 依赖 `claude -p` 触发 skill 路由。在 Hermes Agent 里 `claude -p` 是独立进程，不走 Hermes skill 加载——eval 会给出全零分数，误导优化。如果你在 Hermes 环境，跳过 Step 3，直接用 talent-mind 自审 description 后手动更新。
+> ⚠️ **Hermes 环境注意**：此 loop 依赖 `claude -p` 触发 skill 路由。在 Hermes Agent 里 `claude -p` 是独立进程，不走 Hermes skill 加载——eval 会给出全零分数，误导优化。
+
+**默认路径（Hermes 推荐）：跳过 Step 1-3，直接用 talent-mind 自审 description。**
+
+When the user says "默认就行" or otherwise indicates to proceed without the full eval pipeline, use talent-mind three-step self-review:
+```
+矛盾探测器（找反例） → 表征转换器（换语言） → 元认知钩子（跳出来）
+```
+Then manually patch the description. This is the standard path for Hermes Agent sessions.
+
+**完整路径（外部 Claude CLI / 非 Hermes 环境）**：按 Step 1-4 顺序执行。
 
 Tell the user: "This will take some time — I'll run the optimization loop in the background and check on it periodically."
 

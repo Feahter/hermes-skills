@@ -35,6 +35,8 @@ description: 知识库同步 Skill — 会话结束时同步项目文档和 Agen
 
 **Platforms**: Claude Code, OpenAI Codex, OpenCode, OpenClaw, Hermes
 
+> **Memory Palace Pattern**: When restructuring large memory systems (single file >5KB or multi-topic), apply the three-layer routing model (Index → Load → Reference). See `references/memory-palace.md` for the architectural pattern and实施 guide.
+
 ## Key Concept: Three Types of Knowledge, Three Audiences
 
 **Critical**: If you only edit CLAUDE.md and ignore docs/, you leave downstream colleagues and other agents stranded.
@@ -215,6 +217,7 @@ grep -rn "<username>" . --include="*.md" 2>/dev/null | grep -v "/node_modules/"
 - **Append-only mindset**: Not deleting obsolete content creates noise
 - **Missing cross-project**: Forgetting to update downstream docs when upstream changes
 - **Skipping Step 1 inventory**: Going straight to changes without reading all files first
+- **Coding before indexing**: When restructuring memory systems, always create the routing layer (`_index.md`) and split files BEFORE touching code. The routing layer is the spec for the code changes.
 - **Inventing changes**: Don't write new content that isn't backed by this conversation — sync reality, don't create fiction
 - **Conflating with context-manager**: These are different tools — context-manager = compression, neat-freak = sync
 

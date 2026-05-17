@@ -1,6 +1,10 @@
 ---
 name: context-pollution-defender
 description: 防止长任务中上下文污染导致响应质量下降。触发：长任务(30min+/50+calls)、用户反馈跑偏、优先级固化。
+hooks:
+  - post_tool_call
+  - pre_llm_call
+  - on_session_reset
 metadata:
   combinator:
     triggers:
@@ -52,6 +56,40 @@ metadata:
 4. **优先级栈透明化**：有效期内优先级列表，避免固化
 
 ---
+
+## 决策疲劳三维模型（Statewright 实证补充）
+
+> 2026-05-16 talent-mind 分析新增：context-pollution 防治有**三个层级**，当前 skill 只覆盖了其中一层。
+
+| 层级 | 决策内容 | Hermes 现状 | Statewright 方案 |
+|------|----------|-------------|------------------|
+| **单 Agent 内部** | 工具调用选择 | ⚠️ **几乎空白**（196 skills 全量可见） | 阶段级工具白名单（事前压缩） |
+| **多 Agent 系统** | Skill/Agent 选择 | ✅ 部分覆盖（skill-combinator + Hook） | — |
+| **循环犹豫** | 阶段边界缺失 | ⚠️ iteration 计数，无强制推进 | 阶段超时强制推进 |
+
+### 核心洞察
+
+- **事后补救 ≠ 事前预防**：Hook 机制落地解决了"污染后注入精简提醒"，但 Statewright 证明 32% token 已在错误选择中浪费——此时模型已无法自救
+- **工具可见性 = 注意力引导**：不是"等上下文膨胀再压缩"，而是"每轮只加载当前阶段需要的工具 schema"
+- **最小有效干预点**：阶段级工具白名单（成本最低，14B 模型即可见效）
+
+### Hook 机制潜力
+
+当前 Hook 只注入"精简提醒"。**真正有效的用法**：`pre_llm_call` 时注入阶段级工具白名单，按 skill 类型预定义该阶段可见的工具集。
+
+### 待办方向
+
+- [ ] 研究：按 skill 类型划分工具可见性（coding 类 / research 类 / creative 类各有不同工具集）
+- [ ] 实验：Hook 层面注入阶段工具白名单 vs 注入精简提醒的效果对比
+
+## 已知问题（同类延伸）
+
+|| 问题 | 现状 | 优先级 |
+||------|------|--------|
+|| context-pollution-defender 未被自动调用 | Hook 机制已落地（2026-05-15）：scripts/post_tool_call.py 自动注册 | ✅ 已解决 |
+|| Hook 机制缺口 | Hermes 已有 pre_llm_call / post_tool_call / on_session_reset | ✅ 已解决 |
+|| **单 Agent 工具可见性无管控** | 196 skills 全量可见，无按阶段加载 | ⚠️ **未解决**（本表新增） |
+|| **循环犹豫无阶段强制推进** | 只有 iteration 计数（≥15/30/50），无超时强制切换 | ⚠️ **未解决**（本表新增） |
 
 ## 决策树：何时需要重置？
 

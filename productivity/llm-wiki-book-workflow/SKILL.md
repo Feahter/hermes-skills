@@ -1,6 +1,6 @@
 ---
 name: llm-wiki-book-workflow
-description: 内容摄入 Wiki 全流程：书籍 / GitHub仓库 / 论文 → wiki实体页 + 概念页 + 道法术器分析。触发：书籍入库、repo归档、wiki摄入、内容归档、知识库构建。自动处理下载/提取/wiki写入/索引更新/跨页链接验证。
+description: 内容摄入 Wiki 全流程：书籍 / GitHub仓库 / 论文 / 微信公众号文章 → wiki实体页 + 概念页 + 道法术器分析。触发：书籍入库、repo归档、wiki摄入、内容归档、知识库构建。自动处理下载/提取/wiki写入/索引更新/跨页链接验证。
 ---
 
 # LLM Wiki 内容摄入工作流
@@ -107,6 +107,8 @@ ls -lh ~/books/<书名>.pdf
 **多书并行搜索**：一次 `web_search` 最多搜 4 本书，避免触发频率限制
 
 **参考**：`references/book-sources.md`（含各源连通性状态和失败模式）
+**GitHub Repo 摄入**：`references/github-repo-ingestion.md`（克隆+raw提取+wiki写入+index更新的完整流程模式）
+**微信公众号摄入**：`references/article-ingestion-notes.md`（微信文章抓取+wiki写入流程）
 
 ---
 
@@ -203,7 +205,7 @@ print(f"总页数: {total}, 第1页字数: {len(sample)}")
 
 **流程**：
 1. 从 raw content 提取关键概念（1本书/1仓库 → 1 entity + 1~3 concepts）
-2. 按 SCHEMA.md 格式写 frontmatter（type/sources/tags 必填）
+2. 按 SCHEMA.md 格式写 frontmatter（type/sources/tags 必填；sources 对 article 填 `raw/articles/`，对 book 填 `raw/books/`）
 3. 每页最少 2 个 `[[wikilinks]]`
 4. **按序**更新 `~/wiki/index.md`（**entity 区先于 concept 区**）
 5. 追加 `~/wiki/log.md`
@@ -223,6 +225,13 @@ print(f"总页数: {total}, 第1页字数: {len(sample)}")
 - 方法论/概念/思维框架 → **concept**
 
 **并行策略**：每次 `delegate_task` 最多 4 个子任务，超出则分批
+
+**⚠️ Subagent 超时保护（2026-05-15 强制规则）**：
+- 单个 delegate_task 的 task scope **必须小于 5 分钟预期**
+- 大任务（article ingestion、book extraction）**不要**塞进单个 delegate_task
+- 正确做法：拆分粒度（如 raw article 提取 和 wiki page 创建 分开两步）
+- 超时后：subagent 返回 partial result，**主 agent 接手完成**，不重试整个任务
+- **禁止**：为超时任务重新 delegate_task（会重复已做的工作）
 
 ---
 
@@ -271,8 +280,10 @@ print(f"总页数: {total}, 第1页字数: {len(sample)}")
 ## 文件结构
 
 ```
-~/books/                    # 原始 epub
-~/wiki/raw/books/           # 提取的 markdown
+~/books/                    # 原始 epub/pdf
+~/wiki/raw/books/           # 提取的 markdown（书籍）
+~/wiki/raw/articles/        # 提取的 markdown（文章）
+~/wiki/raw/github/          # 提取的 markdown（repo）
 ~/wiki/entities/            # 实体页面
 ~/wiki/concepts/            # 概念页面
 ~/wiki/index.md             # 索引
@@ -289,6 +300,7 @@ print(f"总页数: {total}, 第1页字数: {len(sample)}")
 4. **Log 规范**：ingestion 完成必须追加 log.md
 5. **Wikilinks**：新建页面至少 2 个外部链接，指向现有 wiki 页面或 raw source
 6. **长文本**：提取的 markdown 超过 200KB 时分段处理
+7. **网页文章截断**：`web_extract` 对 >5000 字符的文章截断，恢复方法见 `references/article-ingestion-notes.md` Step 1 三步法
 
 ---
 
@@ -335,3 +347,4 @@ diff /tmp/wiki_links_needed.txt /tmp/wiki_files_exist.txt
 - **扫描图片版 PDF**：pypdf 提取返回空字符串，但 `file` 命令显示为 PDF，总页数少（<30）。处理：跳过文字提取，不写入 raw/books/
 - **节选/样本 PDF**：总页数极少（<30）但文件较大（>1MB），不是完整书。判断：总页数 + 文件大小结合判断
 - **curl 返回 HTML**：大小从 1KB 到 150KB 不等，必须同时用 `file` 命令验证 magic bytes
+- **kimi.com share URL 的 web_extract 失败**：返回 `{"error": "content too short"}` 或空 content → 使用已有上下文（skill 内容、session memory）补全，不重试 web_extract

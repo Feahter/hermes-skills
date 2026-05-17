@@ -1,0 +1,17 @@
+{
+  "skill": "jupyter-live-kernel",
+  "version": "auto",
+  "max_query_length": 20,
+  "min_query_length": 9,
+  "avg_query_length": 13.4,
+  "unsupported_patterns": [],
+  "known_failure_modes": [],
+  "quality_decay_curve": {
+    "0-100": 0.6
+  },
+  "last_probed": "2026-05-11T13:27:44.787425",
+  "probe_count": 0,
+  "total_invocations": 5,
+  "total_failures": 0,
+  "failure_rate": 0.0
+}

@@ -161,7 +161,7 @@ fail_cases 积累 → 触发 regression_generator
     ↓
 扫描 SKILL.md 的触发场景关键词
     ↓
-基于触发场景生成真实格式的调用记录
+基于触发场景生成真实格式的调用记录（JSONL）
     ↓
 写入 invocations/ 目录
     ↓
@@ -170,20 +170,16 @@ boundary_detector.scan() 从种子数据学习边界
 后续真实使用覆盖种子数据（无侵入）
 ```
 
-### 种子生成脚本
+### 手动注入种子数据
 
-`~/.hermes/skills/.experiment_log/scripts/seed_generator.py`（由 experiment-logger Phase 3 提供）：
+当前 `skills_feedback.py` **不支持** `--seed` / `--seed-all`（待实现）。手动注入方式：
 
-```bash
-# 生成单个 skill 的种子数据（默认5条）
-python3 ~/.hermes/skills/.experiment_log/skills_feedback.py --seed <skill_name>
-
-# 批量生成所有无数据 skills 的种子
-python3 ~/.hermes/skills/.experiment_log/skills_feedback.py --seed-all
-
-# 查看当前数据状态
-python3 ~/.hermes/skills/.experiment_log/skills_feedback.py --stats
+1. 在 `~/.hermes/skills/.experiment_log/invocations/` 下创建 `seed_<skill>.jsonl`
+2. 每条记录格式：
+```json
+{"invocation_id": "uuid", "timestamp": "ISO8601", "query_hash": "seed_N", "user_id": null, "channel": "seed", "skill_selected": "<skill>", "input": {"query": "<trigger phrase>", "context_snapshot": null}, "output": {}, "quality": {"explicit_rating": null, "implicit_signal": "success", "followup_same_skill": false, "followup_refined": false}, "error": null}
 ```
+3. 每 skill 生成 5 条代表性触发查询
 
 ### 触发条件
 
@@ -245,7 +241,7 @@ boundary_detector.scan() 从新数据中更新边界签名
 
 ## Pitfalls
 
-- **Hygiene 误判（本次最大教训）**：名称/描述表面相似 ≠ 实际重叠。talent-mind 分析常发现大量"潜在合并/删除项"，但读文件后发现多数是误判——如 create vs modify（角色不同）、纵向钻取 vs 横向分析（目的不同）、中文 vs 英文（触发场景不同）。** Hygiene 工作流必须强制读文件验证，不能跳过直接执行分析结果。**
+- **memory 工具批量删除限制**：当 entry 包含换行符或多个子句时，`memory remove` 的 `old_text` 必须精确匹配整个 entry 才能删除。**不能用批量匹配删除**，只能逐条删除。最优工作流：对要保留的内容做 `memory add`（合并版），再逐条 `memory remove` 旧条目。比逐条删除更快且不会因一条匹配失败而中断整个流程。
 - **推断误差**：自动推断不准确时，在 SKILL.md 加显式声明
 - **反馈噪声**：`~/.hermes/.skill_combinator_feedback.json` 长期积累后 task_key 前缀匹配可能不准，可定期清理
 - **Subagent 模型路由不验证**：`delegate_task` 的 `model` 参数不校验模型 ID 是否存在于 provider，指定无效 model ID 时静默降级到默认模型

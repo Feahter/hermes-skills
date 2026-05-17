@@ -4,6 +4,7 @@ description: "Write implementation plans: bite-sized tasks, paths, code."
 version: 1.1.0
 author: Hermes Agent (adapted from obra/superpowers)
 license: MIT
+platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [planning, design, implementation, workflow, documentation]
@@ -31,6 +32,8 @@ Assume the implementer is a skilled developer but knows almost nothing about the
 - Feature seems simple (assumptions cause bugs)
 - You plan to implement it yourself (future you needs guidance)
 - Working alone (documentation matters)
+
+**For external repo features (e.g. hermes-agent PRs):** Write RFC first, submit as GitHub issue, get link before planning implementation. This validates the idea, establishes a reference thread, and ensures the feature belongs in the upstream before investing in a full plan.
 
 ## Bite-Sized Task Granularity
 
@@ -269,6 +272,10 @@ git commit -m "type: description"
 **Bad:** "Create the model file"
 **Good:** "Create: `src/models/user.py`"
 
+### External Repo Labels Need Maintainer Permissions
+
+When creating GitHub issues via `gh issue create`, labels must already exist on the target repo — `gh issue create --label "enhancement"` fails if the label doesn't exist. Workaround: create the issue without labels, then add them via `gh issue edit N --add-label ...` only if you have maintainer permissions. Feahter's fork may not have label creation rights on upstream repos.
+
 ## Execution Handoff
 
 After saving the plan, offer the execution approach:
@@ -280,6 +287,10 @@ When executing, use the `subagent-driven-development` skill:
 - Spec compliance review after each task
 - Code quality review after spec passes
 - Proceed only when both reviews approve
+
+## References
+
+- `references/rfc-stage-tool-whitelist-26524.md` — example RFC for upstream hermes-agent feature proposal
 
 ## Remember
 

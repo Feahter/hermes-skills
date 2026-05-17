@@ -83,6 +83,38 @@ metadata:
 
 **收敛检查：** 元层的质疑是否暴露了前两层的前提错误？
 
+**⚠️ 层级依赖陷阱（来自 skill 系统三层改造 2026-05-12）：**
+修改多层架构时，各层改动可能存在**单向因果依赖**——做 B 而跳过 A 会导致退化。
+例：Skills 系统的 P0（description 质量）→ P2（lazy loading）是单向依赖。不做 P0 直接做 P2 → agent 不知道 support files 存在，路由退化。
+**检验方法：** 元认知追问"如果我跳过 Layer N，Layer N+1 还成立吗？"
+
+**⚠️ 架构约束陷阱（来自 2026-05-16 session — Hermes 决策疲劳分析）：**
+分析"Hermes缺什么"时，先确认现有架构**能做什么**。例如：`pre_llm_call` hook 只能注入 context，不能过滤 `self.tools`（工具列表在 `AIAgent.__init__` 时固定）。结论"Hermes缺阶段工具白名单"是对的，但修复方案需要 core 改动，不能只靠 hook skill。
+**检验方法：** 元认知追问"这个问题的解是否在现有架构的可行域内？"如果不在，先调整问题边界，再输出结论。
+
+**⚠️ 方案成本陷阱（来自 2026-05-16 TencentDB 研究 session）：**
+方案选型时，"最小改动"是最常见的误导性标准。例如：在 ContextCompressor 里加 refs/ offloading 看起来改动最小，但 ContextEngine 接口根本不支持 per-tool-call hook，这个方案在架构上不可行。
+**检验方法：** 方案评估前，先问"这个方案的集成点在哪？现有接口是否支持？"——不是问"改动多少行"，是问"架构上是否可能"。如果架构不支持，最小改动方案的成本是**完全重做**。
+
+**⚠️ 研究顺序陷阱（来自 2026-05-16 TencentDB + Statewright 双研究 session）：**
+研究外部系统时，**先读代码再看 README**。README 只给方向，代码才给真相。
+- 错误顺序：README → 结论 → 代码验证（此时结论已经固化）
+- 正确顺序：**代码关键文件**（lib.rs / executor.rs / types.rs / tool_*.rs）→ README 交叉验证 → 结论
+- 教训：TencentDB 研究花了 20 分钟读 README 给结论，但核心发现来自 executor.rs；Statewright 我在 README 层停留太久
+- **检验方法：** 输出结论前自问"这个判断来自 README 还是代码？代码里有反例吗？"
+
+**⚠️ Enforcement 层陷阱（来自 2026-05-16 Statewright 研究）：**
+评估 enforcement 强度时，README 的描述往往夸大。实际代码位置决定真实强度：
+- **协议层**：tool call 在协议层就被 block，LLM 根本不知道有这个工具
+- **应用层（LLM call 前）**：LLM 能看到工具定义，但 filtered tools 在 call 前被删
+- **应用层（api_kwargs）**：Hermes 的 pre_llm_call → api_kwargs 过滤，属于此类
+- Statewright README 说"MCP protocol layer hard enforcement"，但代码里是 executor 内 application layer
+- **检验方法：** 找 `enforce_tools` / `pre_llm_call` / `api_kwargs["tools"]` 的实际代码位置，不要相信 README
+
+**⚠️ 测试陷阱（来自 2026-05-16 stage-tool-whitelist 验证）：**
+`hermes -z` 模式不激活 hooks，无法用于测试 enforcement 机制。必须用真实交互 session 验证。
+- **检验方法：** 用 `hermes --yolo` 进入交互 session，再测试 stage + tool restriction
+
 ---
 
 ## 四组对立统一（工具箱，非流程）
@@ -125,14 +157,28 @@ metadata:
 ---
 
 ## 验证清单（输出后必做）
+## 验证清单（输出后必做）
 
+**⚠️ 结论必须先验证再记待办（硬约束）：**
 ```
 Before finalizing, verify:
 ☐ 矛盾探测器：是否真的找到了反例，还是只是在正例里打转？
 ☐ 表征转换器：是否切换了语言，还是只是换了同义表述？
 ☐ 元认知钩子：元层质疑是否比对象层/过程层更深一层？
 ☐ 自评分数：整体思考质量 ≥ 4/5，否则从 STEP 1 重来
+☐ [NEW] Wiki 交叉验证：结论是否与现有 wiki 知识冲突？
+   - 步骤：搜索 wiki（search_files）关键词
+   - 如果 wiki 已有相关 page → 结论可能是重复或需要修正
+   - 如果 wiki 标注"已解决" → 结论需要修正
+   - 如果 wiki 完全没有记录 → 结论为新洞察，可记待办
+☐ [NEW] 动作决策：验证无误后，再决定是否记待办
+   - 结论经 wiki 验证为新洞察 → 问用户是否记待办
+   - 结论与 wiki 矛盾 → 修正结论，重新输出
 ```
+
+**常见错误案例（来自 2026-05-15 session）：**
+- 分析声称"Hermes 缺 Compaction" → 但 `Compaction.md` 已存在且标注"已解决"
+- 正确流程：先 wiki 搜索确认，再输出结论
 
 ---
 
@@ -198,4 +244,77 @@ Before finalizing, verify:
 | 陷入定势 | 元认知钩子（跳出来） |
 | 重大决策 | 四组对立统一（全面审视） |
 | 审查自己的想法 | 验证清单（四项全做） |
+| 审查多层架构改动 | 元认知钩子（检查层级间是否存在因果依赖） |
 | 工具/方案选型 | 矛盾探测器（找边际收益最高的选项）+ 能力槽位分析 |
+| 项目研究评估 | 矛盾探测器（找架构约束陷阱）+ 表征转换器（数学/架构/隐喻三视角）+ 落地方案三轨评估 |
+| **新工具/系统研究** | **矛盾探测器（找架构约束陷阱）+ 实验论证核心假设（见下方）+ 移植模式决策树** |
+
+## 实验论证模式（新）
+
+当研究一个外部系统并评估对 Hermes 的参考价值时：
+
+```
+0. 代码级架构分析（先于一切）
+   └─ 找关键源文件：lib.rs / executor.rs / types.rs / tool_*.rs
+   └─ 确认 enforcement 实际发生的位置（协议层 vs 应用层）
+   └─ README 交叉验证（README 的描述和代码一致吗？）
+
+1. 架构差异分析（矛盾探测器）
+   └─ 找出本质架构差异（主动推送 vs 被动拉取）
+   └─ 确认现有接口约束（ContextEngine 接口是否支持？）
+
+2. 方案设计（先提方案，不先论证）
+   └─ 按成本/收益/风险排序
+   └─ 识别每个方案的核心假设
+
+3. 实验验证核心假设（硬约束）
+   └─ 假设必须先验证，再写 500+ 行代码
+   └─ Hermes 单 prompt 测试：source venv/bin/activate && hermes -z "prompt" --yolo --ignore-user-config
+   └─ 关键问题：Summary 质量是否足够好到不需要召回？
+
+4. 结论：可落地 / 需实验验证 / 架构不可行
+```
+
+**案例（2026-05-16 TencentDB 研究）：**
+- 方案 B（CanvasContextEngine）被选中 P0
+- 核心假设："agent 能理解 `[ref:node_id]` 并主动召回"
+- 实验：T1-T5 验证 → 假设**部分成立**（工具必须在 schema 注册）
+- 结论：方案 B 可行，但需要 canvas_expand 在 tools schema 真实注册
+
+**移植模式案例（2026-05-16 Statewright → Hermes stage-tool-whitelist）：**
+
+研究完外部系统后，判断是否值得落地时，按以下优先级决策：
+
+| 优先级 | 模块类型 | 可移植性 | 原因 |
+|--------|---------|---------|------|
+| P0 | 确定性算法（无 LLM 依赖） | 高（直接 port）| guard_engine / transition_resolver |
+| P1 | 配置型（数据驱动的规则） | 高（JSON schema）| whitelist_config / state def |
+| P2 | 工具型（独立功能） | 中（需适配）| command_filter / edit_enforcer |
+| P3 | 控制流型（依赖宿主架构） | 低（需重设计）| executor loop / orchestrator 子状态机 |
+| 不可移植 | 强制依赖（Ollama only）| 0 | 违背 Hermes provider 抽象 |
+
+**决策树：**
+```
+外部系统的优势 = X
+X 依赖 LLM 吗？
+  ├─ 是 → 跳过或作为可选增强
+  └─ 否 → X 依赖宿主控制流吗？
+             ├─ 是（executor loop）→ 只移植算法，重设计集成点
+             └─ 否（guard / config）→ 直接移植，验证后集成
+```
+
+## Hermes CLI 单 Prompt 测试
+
+```bash
+source venv/bin/activate && hermes -z "prompt content" --yolo --ignore-user-config
+```
+
+用于快速验证 agent 对特定 prompt 的响应，无需启动交互式 session。
+
+## 参考资料
+
+- `references/tencentdb-agent-memory-2026-05-16.md` — TencentDB Agent Memory 研究记录（含落地方案设计和 T1-T5 实验验证结果）
+
+## 参考资料
+
+- `references/tencentdb-agent-memory-2026-05-16.md` — TencentDB Agent Memory 研究记录（含落地方案设计）

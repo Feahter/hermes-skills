@@ -1,9 +1,10 @@
 ---
 name: hermes-agent-skill-authoring
-description: "Author in-repo SKILL.md: frontmatter, validator, structure."
+description: "Load when: editing or creating in-repo SKILL.md files under hermes-agent/skills/, or need frontmatter/validator/structure conventions. Keywords: SKILL.md, in-repo, authoring, frontmatter, validator, structure"
 version: 1.0.0
 author: Hermes Agent
 license: MIT
+platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [skills, authoring, hermes-agent, conventions, skill-md]
@@ -24,6 +25,23 @@ There are two places a SKILL.md can live:
 - User asks you to add a skill "in this branch / repo / commit"
 - You're committing a reusable workflow that should ship with hermes-agent
 - You're editing an existing skill under `/home/bb/hermes-agent/skills/` (use `patch` for small edits, `write_file` for rewrites; `skill_manage` still works for patch on in-repo skills, but not for `create`)
+
+## Description Format: Index Layer vs Load Layer
+
+There are two description formats depending on which layer you're targeting:
+
+| Layer | Format | Purpose |
+|---|---|---|
+| **Index** (in `available_skills` list) | `Load when: <intent>` | Routing trigger — should the agent load this Skill at all? |
+| **Load** (Skill body) | `Use when: <task>` | Functional summary — what does this Skill enable? |
+
+> **When to use which:** For `hermes-agent-skill-authoring` (in-repo skills), the frontmatter `description` field appears in the Index layer → use "Load when..." format. The body uses "Use when..." for human-readable guidance.
+
+**Checklist for Index descriptions:**
+- [ ] Starts with "Load when..." (capital L, lowercase w)
+- [ ] Target 50 words or fewer
+- [ ] Describes user's intent from real queries
+- [ ] Does NOT summarize the workflow
 
 ## Required Frontmatter
 
@@ -124,6 +142,204 @@ Pick the closest existing category. Don't invent new top-level categories casual
 5. **Git add + commit** on the active branch.
 6. **Note:** the CURRENT session's skill loader is cached — `skill_view` / `skills_list` will not see the new skill until a new session. This is expected, not a bug.
 
+## Lifecycle Hooks
+
+Skills can declare lifecycle hooks in frontmatter to react to agent events (tool calls, LLM calls, session boundaries) — the same hooks that plugin modules use.
+
+### Declaration
+
+In `SKILL.md` frontmatter:
+
+```yaml
+hooks:
+  - post_tool_call    # fires after every tool execution
+  - pre_llm_call     # fires before every LLM call (can inject context)
+  - on_session_reset # fires when user starts a new session
+```
+
+Supported hooks (same as plugin hooks): `pre_tool_call`, `post_tool_call`, `transform_tool_result`, `pre_llm_call`, `post_llm_call`, `transform_llm_output`, `pre_approval_request`, `post_approval_response`, `on_session_start`, `on_session_end`, `on_session_finalize`, `on_session_reset`, `subagent_stop`, `pre_gateway_dispatch`, `pre_api_request`, `post_api_request`.
+
+### Declaration
+
+In `SKILL.md` frontmatter:
+
+```yaml
+hooks:
+  - post_tool_call    # fires after every tool execution
+  - pre_llm_call     # fires before every LLM call (can inject context)
+  - on_session_reset # fires when user starts a new session
+```
+
+Supported hooks (same as plugin hooks): `pre_tool_call`, `post_tool_call`, `transform_tool_result`, `pre_llm_call`, `post_llm_call`, `transform_llm_output`, `pre_approval_request`, `post_approval_response`, `on_session_start`, `on_session_end`, `on_session_finalize`, `on_session_reset`, `subagent_stop`, `pre_gateway_dispatch`, `pre_api_request`, `post_api_request`.
+
+### Implementation
+
+For each declared hook, create `scripts/<hook_name>.py` in the skill directory:
+
+```python
+# scripts/post_tool_call.py
+def post_tool_call(tool_name, args, result, task_id="", session_id="",
+                   tool_call_id="", duration_ms=0, **kwargs):
+    """Called after every tool execution. Return None to no-op."""
+    pass
+```
+
+**Callback signatures by hook:**
+
+| Hook | Signature |
+|------|-----------|
+| `pre_tool_call` | `(tool_name, args, task_id, session_id, tool_call_id)` |
+| `post_tool_call` | `(tool_name, args, result, task_id, session_id, tool_call_id, duration_ms)` |
+| `transform_tool_result` | `(tool_name, args, result, task_id, session_id, tool_call_id)` |
+| `pre_llm_call` | `(session_id, user_message, conversation_history, is_first_turn, model, platform, sender_id, **kwargs)` |
+| `post_llm_call` | `(messages, response, session_id, task_id)` |
+| `transform_llm_output` | `(messages, response, session_id, task_id)` → return modified response |
+| `on_session_reset` | `(session_id, task_id)` |
+
+Function name must match hook name (or use generic `callback` as fallback).
+
+**`pre_llm_call` return values — two forms:**
+
+```python
+# Form 1: Context injection only (existing documented behavior)
+{"context": "injected text..."}           # string preferred, auto-wrapped
+{"context": "...", "tools": []}          # tools=[] is a no-op (keeps all tools)
+
+# Form 2: Tool whitelisting (RFC #26524, implemented run_agent.py ~11817-11828)
+{"context": "stage reminder...", "tools": ["read_file", "terminal"]}
+# The "tools" key whitelists which tools the model sees this turn.
+# Canonical reference skill: skills/system/stage-tool-whitelist/
+#
+# Core implementation in run_agent.py:
+#   - Lines ~11817-11828: parse tools key from pre_llm_call hook results
+#   - Lines ~12269-12279: filter api_kwargs["tools"] post-_build_api_kwargs
+# The filter is a whitelist — tools NOT in the list are removed from the
+# API call's tool schema. self.tools (session registry) is untouched.
+```
+
+The callback function name must match the hook name (or be named `callback` as fallback). It receives the same kwargs as the plugin hook equivalent.
+
+### Session Scoping
+
+Skill hooks are **session-scoped** — they register when the skill is loaded and automatically clear on `/new` (session reset). This differs from plugin hooks which persist for the process lifetime.
+
+The registration is idempotent: loading the same skill twice in one session is a no-op.
+
+### Registration Flow
+
+When `build_skill_invocation_message()` or `build_preloaded_skills_prompt()` loads a skill, it calls `_register_skill_hooks()` which:
+1. Reads `hooks:` from frontmatter
+2. For each hook, checks `scripts/<hook_name>.py`
+3. Imports via `importlib.util.spec_from_file_location`
+4. Registers via `hermes_cli.plugins.register_skill_hook(skill_name, hook_name, callback)`
+
+### Clearing on Session Reset
+
+`cli.py` calls `clear_all_skill_hooks()` + clears `_registered_skill_hooks` on `/new`. Gateway paths fire the `on_session_reset` hook which triggers skill hook cleanup via the same mechanism.
+
+### Canonical Use Case: context-pollution-defender
+
+This skill is the reference implementation. It demonstrates all three hook patterns: `post_tool_call` for counting, `pre_llm_call` for injecting reminders, `on_session_reset` for cleanup.
+
+**Frontmatter registration:**
+```yaml
+hooks:
+  - post_tool_call
+  - pre_llm_call
+  - on_session_reset
+```
+
+**scripts/post_tool_call.py** (thread-safe counter, three thresholds):
+```python
+import threading, time
+_counter_lock = threading.Lock()
+_session_counters: dict[str, dict] = {}
+
+def _get_session_key(session_id, task_id):
+    return session_id or task_id or "default"
+
+def _increment(session_id, task_id):
+    key = _get_session_key(session_id, task_id)
+    with _counter_lock:
+        entry = _session_counters.setdefault(key, {"count": 0})
+        entry["count"] += 1
+        return entry["count"]
+
+def post_tool_call(tool_name, args, result, task_id="", session_id="", **kwargs):
+    count = _increment(session_id, task_id)
+    if count == 16:
+        _queue_reminder(session_id, task_id, "精简模式：减少解释，结论先行")
+    elif count == 32:
+        _queue_reminder(session_id, task_id, "极简模式：只做当前最小动作")
+    elif count == 56:
+        _queue_reminder(session_id, task_id, "应急模式：立即停止，发起上下文重置")
+
+def _queue_reminder(session_id, task_id, message):
+    key = _get_session_key(session_id, task_id)
+    with _counter_lock:
+        _session_counters.setdefault(key, {})["pending_reminder"] = message
+
+# scripts/pre_llm_call.py (consumes the queued reminder):
+def pre_llm_call(messages, session_id="", task_id="", **kwargs):
+    key = _get_session_key(session_id, task_id)
+    with _counter_lock:
+        entry = _session_counters.pop(key, {})
+        reminder = entry.get("pending_reminder")
+    if reminder:
+        return {"context": f"[上下文污染预警] {reminder}"}
+
+# scripts/on_session_reset.py:
+def on_session_reset(session_id="", task_id="", **kwargs):
+    key = _get_session_key(session_id, task_id)
+    with _counter_lock:
+        _session_counters.pop(key, None)
+```
+
+Key design decisions:
+- Thread-safe via `threading.Lock` (cron jobs run in thread pool)
+- Session-scoped via session_id/task_id bucket key (not global counter)
+- `pre_llm_call` returns `{"context": ...}` to inject into user message
+- `on_session_reset` clears per-session state (handles `/new` in both CLI and gateway)
+
+### RFC Workflow for Core Changes
+
+When a feature requires modifying `run_agent.py`, `plugins.py`, or other core files
+(beyond what a skill can achieve in userspace), follow the RFC process:
+
+1. **Confirm repo:** `gh auth status` → verify GitHub credentials (user: Feahter, keyring)
+2. **Draft RFC:** Write the RFC body to `/tmp/issue-body.md` with sections:
+   - Summary / Motivation
+   - Proposed solution (with code examples)
+   - Alternatives considered
+   - Implementation status (what's done locally vs. needs core)
+3. **Create issue:** `gh issue create --repo NousResearch/hermes-agent --title "[RFC] <title>" --body-file /tmp/issue-body.md`
+4. **Add labels:** `gh issue edit <num> --add-label type/feature,comp/agent` (maintainer-only; issue creation succeeds without)
+5. **Post implementation status:** After local implementation, add a comment with:
+   - What was built (with file:line references)
+   - What remains (requires core changes)
+   - Reference skill path if applicable
+
+**Example RFC structure:**
+```markdown
+## Summary
+Brief one-paragraph description.
+
+## Motivation
+Why this is needed (decision fatigue, performance, etc.).
+
+## Proposed Solution
+Exact code changes with file:line references.
+
+## Status
+| Item | Status |
+|------|--------|
+| Core mechanism | ✅ Done / ⬜ Not done |
+```
+
+The `stage-tool-whitelist` skill (`skills/system/stage-tool-whitelist/`) is a reference
+implementation of an RFC-driven feature (RFC #26524) — three script files, one SKILL.md,
+demonstrating the full hook authoring + RFC cycle.
+
 ## Cross-Referencing Other Skills
 
 `metadata.hermes.related_skills` unions both trees (`skills/` in-repo and `~/.hermes/skills/`) at load time. You CAN reference a user-local skill from an in-repo skill, but it won't resolve for other users who clone the repo fresh. Prefer referencing only in-repo skills from in-repo skills. If a frequently-referenced skill lives only in `~/.hermes/skills/`, consider promoting it to the repo.
@@ -141,7 +357,7 @@ Pick the closest existing category. Don't invent new top-level categories casual
 
 2. **Leading whitespace before `---`.** The validator checks `content.startswith("---")`; any leading blank line or BOM fails validation.
 
-3. **Description too generic.** Peer descriptions start with "Use when ..." and describe the *trigger class*, not the one task. "Use when debugging X" > "Debug X".
+3. **Description format wrong for Index layer.** The frontmatter `description` field appears in `available_skills` (Index layer) → must start with "Load when..." not "Use when...". Body guidance can use "Use when...".
 
 4. **Forgetting the author/license/metadata block.** Not validator-enforced, but every peer has it; omitting makes the skill look half-finished.
 
@@ -157,7 +373,7 @@ Pick the closest existing category. Don't invent new top-level categories casual
 - [ ] Frontmatter starts at byte 0 with `---`, closes with `\n---\n`
 - [ ] `name`, `description`, `version`, `author`, `license`, `metadata.hermes.{tags, related_skills}` all present
 - [ ] Name ≤ 64 chars, lowercase + hyphens
-- [ ] Description ≤ 1024 chars and starts with "Use when ..."
+- [ ] Description ≤ 1024 chars and starts with "Load when ..." (Index layer routing trigger)
 - [ ] Total file ≤ 100,000 chars (aim for 8-15k)
 - [ ] Structure: `# Title` → `## Overview` → `## When to Use` → body → `## Common Pitfalls` → `## Verification Checklist`
 - [ ] `related_skills` references resolve in-repo (or are explicitly OK to be user-local)

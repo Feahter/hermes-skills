@@ -138,3 +138,37 @@ Client (CLI)  --WebSocket-->  Gateway (ws://127.0.0.1:28789)
 | 批量修改配置（离线） | Python |
 | 原子配置写入（在线） | JS |
 | 脱离 gateway 运行 | Python |
+
+## 故障诊断
+
+详见 `references/diagnosis.md`：
+- Gateway 持续崩溃重启（双实例端口冲突）
+- launchd 服务管理与重载
+- plist 换端口操作步骤
+
+### 必做检查：多实例冲突（端口争夺）
+
+**症状**：gateway 持续崩溃重启，CPU 占用高，进程不断 fork。
+
+**诊断步骤**：
+```bash
+# 1. 检查是否有多个 gateway 进程
+ps aux | grep "gateway --port" | grep -v grep
+
+# 2. 检查 launchd 注册的所有 openclaw 服务
+launchctl list | grep -i openclaw
+
+# 3. 检查 plist 文件（~ = ~/.openclaw/, ~/ = ~/Library/LaunchAgents/）
+ls ~/Library/LaunchAgents/ai.openclaw.*.plist
+ls ~/.openclaw/launchd/*.plist 2>/dev/null
+
+# 4. 检查各安装路径的 openclaw 版本
+openclaw -v
+/usr/local/Cellar/node/25.9.0_1/bin/openclaw -v
+~/.npm-global/bin/openclaw -v
+~/.nvm/versions/node/*/bin/openclaw -v 2>/dev/null
+```
+
+**根因**：两套 OpenClaw（不同安装来源）各自注册了 launchd 服务，抢同一端口。
+
+**解决**：给多余服务换端口，或卸载多余安装。详见 `references/diagnosis.md`。

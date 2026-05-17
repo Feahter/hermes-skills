@@ -1,0 +1,48 @@
+{
+  "skill": "coding-agent",
+  "version": "auto",
+  "max_query_length": 12,
+  "min_query_length": 9,
+  "avg_query_length": 9.75,
+  "unsupported_patterns": [
+    {
+      "failure_reason": "timeout",
+      "count": 2,
+      "keywords": [
+        "用python写一个异步爬虫",
+        "支持代理池和错误重试",
+        "帮我写一个异步爬虫抓取网页"
+      ],
+      "sample_query": "用Python写一个异步爬虫，支持代理池和错误重试"
+    },
+    {
+      "failure_reason": "output_format_error",
+      "count": 1,
+      "keywords": [
+        "写个爬虫",
+        "爬取知乎热榜"
+      ],
+      "sample_query": "写个爬虫，爬取知乎热榜"
+    }
+  ],
+  "known_failure_modes": [
+    {
+      "mode": "timeout",
+      "count": 2,
+      "rate": 0.6666666666666666
+    },
+    {
+      "mode": "output_format_error",
+      "count": 1,
+      "rate": 0.3333333333333333
+    }
+  ],
+  "quality_decay_curve": {
+    "0-100": 1.0
+  },
+  "last_probed": "2026-05-15T20:01:37.286923",
+  "probe_count": 0,
+  "total_invocations": 4,
+  "total_failures": 0,
+  "failure_rate": 0.0
+}

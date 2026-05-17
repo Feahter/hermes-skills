@@ -1,0 +1,17 @@
+{
+  "skill": "markdown-prettier",
+  "version": "auto",
+  "max_query_length": 14,
+  "min_query_length": 7,
+  "avg_query_length": 9.4,
+  "unsupported_patterns": [],
+  "known_failure_modes": [],
+  "quality_decay_curve": {
+    "0-100": 0.6
+  },
+  "last_probed": "2026-05-15T20:01:35.668006",
+  "probe_count": 0,
+  "total_invocations": 5,
+  "total_failures": 0,
+  "failure_rate": 0.0
+}

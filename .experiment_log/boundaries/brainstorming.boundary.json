@@ -1,0 +1,17 @@
+{
+  "skill": "brainstorming",
+  "version": "auto",
+  "max_query_length": 18,
+  "min_query_length": 12,
+  "avg_query_length": 14.8,
+  "unsupported_patterns": [],
+  "known_failure_modes": [],
+  "quality_decay_curve": {
+    "0-100": 1.0
+  },
+  "last_probed": "2026-05-11T13:27:44.417527",
+  "probe_count": 0,
+  "total_invocations": 5,
+  "total_failures": 0,
+  "failure_rate": 0.0
+}

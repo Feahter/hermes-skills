@@ -1,0 +1,17 @@
+{
+  "skill": "skill-evolution-manager",
+  "version": "auto",
+  "max_query_length": 25,
+  "min_query_length": 8,
+  "avg_query_length": 16.6,
+  "unsupported_patterns": [],
+  "known_failure_modes": [],
+  "quality_decay_curve": {
+    "0-100": 1.0
+  },
+  "last_probed": "2026-05-15T20:02:00.695871",
+  "probe_count": 0,
+  "total_invocations": 5,
+  "total_failures": 0,
+  "failure_rate": 0.0
+}

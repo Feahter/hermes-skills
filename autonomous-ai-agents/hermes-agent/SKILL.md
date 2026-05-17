@@ -373,6 +373,25 @@ python -m pytest tests/tools/ -q            # Specific area
 - Tests auto-redirect `HERMES_HOME` to temp dirs
 - Run full suite before pushing any change
 
+### Memory Architecture
+
+**Built-in MemoryStore → MemoryProvider bridge:**
+
+`tools/memory_tool.py` — `MemoryStore` class also implements the `MemoryProvider` interface (same class, not a subclass). This lets it register with `MemoryManager` alongside external providers (Honcho, Mem0, etc.) and participate in per-turn prefetch routing.
+
+**Key implication:** `MemoryManager` is now **always created** when `MemoryStore` exists — even without an external `memory.provider` configured. The check in `run_agent.py` changed from "only if provider configured" to "always when memory enabled."
+
+**Three-layer memory routing (Memory Palace):**
+
+When `~/.hermes/memory/_index.md` exists, the built-in memory switches to palace mode:
+- **Layer 1 (always):** `memory/system/SOUL.md`, `memory/system/AGENTS.md`, `memory/user/USER.md` + `_index.md` routing table → frozen snapshot at session start
+- **Layer 2 (often):** Loaded on session start for common topics
+- **Layer 3 (on-demand):** Loaded per-turn via `MemoryStore.prefetch()` — keyword-matched against `_index.md` routing table, injected into the user message as recall context
+
+The `_index.md` format: pipe table with columns `Section | Keywords (comma-separated) | Load Policy (ALWAYS/OFTEN/ON-DEMAND) | File Path`.
+
+**Adding a new memory provider plugin:** put it in `plugins/memory/<name>/`. Implement `MemoryProvider` abstract class (see `agent/memory_provider.py`). Activate via `memory.provider: <name>` in config.
+
 ### Key Rules
 
 - **Never break prompt caching** — don't change context, tools, or system prompt mid-conversation
@@ -380,3 +399,4 @@ python -m pytest tests/tools/ -q            # Specific area
 - Use `get_hermes_home()` for all paths (profile-safe)
 - Config values go in `config.yaml`, secrets go in `.env`
 - New tools need a `check_fn` so they only appear when requirements are met
+- **MemoryStore is also a MemoryProvider** — when modifying memory initialization in `run_agent.py`, remember it now registers with `MemoryManager` automatically

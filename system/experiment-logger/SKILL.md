@@ -215,85 +215,19 @@ skill-evolution-manager 的反馈收集流程：
 
 ### 冷启动：boundary 签名从 0 开始
 
-新 skill 没有调用记录时，`--scan` 和 `--probe` 都无法工作。需要 Seed Data Injection：
+新 skill 没有调用记录时，`--scan` 和 `--probe` 都无法工作。需要手动 Seed Data Injection：
 
 **步骤：**
 
-1. 扫描 SKILL.md 提取 skill 名称、描述、触发场景
-2. 基于触发场景生成 5 条代表性调用记录（JSONL 格式）
-3. 写入 `invocations/seed_<skill>.jsonl`
-4. 运行 `--scan` 生成边界签名
+1. 在 `~/.hermes/skills/.experiment_log/invocations/` 下创建 `seed_<skill>.jsonl`
+2. 每条记录格式（见下方模板）
+3. 每 skill 生成 5 条代表性触发查询
+4. 运行 `--scan <skill>` 生成边界签名
 
-**Python 实现：**
+**JSONL 格式模板：**
 
-```python
-import re, json, uuid
-from datetime import datetime, timedelta
-from pathlib import Path
-
-skills_dir = Path.home() / ".hermes" / "skills"
-inv_dir = Path.home() / ".hermes" / "skills" / ".experiment_log" / "invocations"
-inv_dir.mkdir(parents=True, exist_ok=True)
-
-# 定义每 skill 的典型查询模板
-templates = {
-    "skill-orchestrator": [
-        "帮我分析这个项目并生成文档",
-        "处理这个Excel并生成PPT报告",
-        "分析销售数据，生成可视化图表",
-        "帮我把这个网站内容抓取下来",
-        "优化这段Python代码并写测试",
-    ],
-    "skill-combinator": [
-        "我需要找一个能做情感分析的 skill",
-        "有什么 skill 可以帮我写公众号吗",
-        "找一个处理 PDF 的 skill",
-    ],
-    # ... 其他 skills
-}
-
-def generate_seed(skill_name: str, queries: list) -> list:
-    records = []
-    for i, query in enumerate(queries[:5]):
-        records.append({
-            "invocation_id": str(uuid.uuid4()),
-            "timestamp": (datetime.now() - timedelta(hours=i*6)).isoformat(),
-            "query_hash": f"seed_{i}",
-            "user_id": None,
-            "channel": "seed",
-            "skill_selected": skill_name,
-            "input": {"query": query, "context_snapshot": None},
-            "output": {},
-            "quality": {
-                "explicit_rating": None,
-                "implicit_signal": "success",
-                "followup_same_skill": False,
-                "followup_refined": False,
-            },
-            "error": None,
-        })
-    return records
-
-# 生成并写入
-for skill, queries in templates.items():
-    records = generate_seed(skill, queries)
-    out_file = inv_dir / f"seed_{skill}.jsonl"
-    with open(out_file, 'w') as f:
-        for r in records:
-            f.write(json.dumps(r, ensure_ascii=False) + '\n')
-    print(f"生成 {skill}: {len(records)} 条 → {out_file.name}")
-
-# 验证
-import subprocess
-r = subprocess.run(["python3", "skills_feedback.py", "--stats"],
-                   capture_output=True, text=True, cwd=inv_dir)
-print(r.stdout)
-```
-
-**验证边界签名：**
-```bash
-python3 skills_feedback.py --scan skill-combinator
-python3 skills_feedback.py --full-loop skill-combinator
+```json
+{"invocation_id": "uuid", "timestamp": "ISO8601", "query_hash": "seed_N", "user_id": null, "channel": "seed", "skill_selected": "<skill>", "input": {"query": "<trigger phrase>", "context_snapshot": null}, "output": {}, "quality": {"explicit_rating": null, "implicit_signal": "success", "followup_same_skill": false, "followup_refined": false}, "error": null}
 ```
 
 **何时使用：**
@@ -419,6 +353,7 @@ boundary_detector.check_risk(skill, query)
 > 详见 `references/three-phase-pattern.md` - 三阶段渐进实现模式
 > 详见 `references/hl-theory.md` - HL 理论笔记（灵感来源）
 > 详见 `references/seed-data-injection.md` - 冷启动边界签名的正确路径
+> 详见 `references/query-api.md` - 新增查询 API（get_real_invocation_stats / get_skill_cooccurrence / skill_combinator 字段）
 
 ### 回归测试生成
 

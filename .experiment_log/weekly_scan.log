@@ -1,0 +1,32 @@
+=== Weekly Skills Boundary Scan ===
+Scan Time: 2026-05-15 20:02:53
+
+## 基础统计
+- 总 Skills 数量: 193
+- 本周总调用记录: 77
+- 有调用记录的 Skills: 17
+- 有边界签名的 Skills: 14
+- 边界签名缺失的 Skills: 179
+
+## Skills 需优先积累数据 (Top 3)
+1. coding-agent: 4 条调用 (低于5条阈值), 3 条失败案例
+2. markdown-prettier: 5 条调用但无边界签名 (本次新发现)
+3. (建议从核心高频 skill 中选择补充)
+
+## 边界签名缺失的 Skills 列表 (共 179 个)
+以下 Skills 有调用记录但无边界签名:
+markdown-prettier
+
+## Skills 调用数据不足 (< 5 条)
+- coding-agent: 4 条
+
+## 回归测试状态
+- coding-agent: 2 条回归测试已生成
+
+## 建议
+1. coding-agent 需优先补充调用数据 (当前仅 4 条)
+2. markdown-prettier 需生成边界签名
+3. 考虑为高频核心 skill (如 github, git, plan 等) 补充边界数据
+
+---
+
