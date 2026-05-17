@@ -206,6 +206,43 @@ List the exact contexts where this skill should activate.
 
 ---
 
+## §Absorbed Sub-skills
+
+The following narrow sub-skills have been absorbed into this umbrella (archived → content merged):
+
+| Sub-skill | Absorbed as | Reason |
+|-----------|------------|--------|
+| `mattpocock/triage` | `references/mattpocock-triage.md` | Issue triage is a skill-authoring workflow phase |
+| `mattpocock/diagnose` | `references/mattpocock-diagnose.md` | Diagnosis loop is a dev/debug phase within skill iteration |
+| `mattpocock/to-issues` | `references/mattpocock-to-issues.md` | Breaking plans into issues is a skill planning workflow |
+| `mattpocock/grill-me` | `references/mattpocock-grill-me.md` | Stress-testing designs is a skill validation phase |
+| `mattpocock/to-prd` | `references/mattpocock-to-prd.md` | PRD authoring is a skill specification workflow |
+| `ai-agent/write-a-skill` | (absorbed directly into body above) | Core skill-writing workflow already covered |
+
+## Quick-Reference: Sub-Skill Workflows
+
+### Issue Triage (from mattpocock/triage)
+> "Triage issues through a state machine driven by triage roles."
+- Use when: creating issues, reviewing bugs/feature requests, managing issue workflow
+- Key concept: tracer-bullet vertical slices
+
+### Diagnosis Loop (from mattpocock/diagnose)
+> "Disciplined diagnosis loop for hard bugs: Reproduce → minimise → hypothesise → instrument → fix → regression-test."
+- Use when: user says "diagnose this", reports a bug, describes performance regression
+- Pattern: structured debugging with explicit hypothesis testing
+
+### Plan → Issues (from mattpocock/to-issues)
+> "Break a plan, spec, or PRD into independently-grabbable issues using tracer-bullet vertical slices."
+- Output: project issue tracker tickets
+- Key: vertical slices, not horizontal layers
+
+### Design Stress-Test (from mattpocock/grill-me)
+> "Interview the user relentlessly about a plan or design until reaching shared understanding."
+- Pattern: one question at a time, resolve each branch of the decision tree
+
+### Context → PRD (from mattpocock/to-prd)
+> "Turn the current conversation context into a PRD and publish to the project issue tracker."
+
 ## Reference files
 
 > 详细内容 → `references/schemas.md`（完整 schema，包含 assertions 字段）

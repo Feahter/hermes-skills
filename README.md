@@ -10,6 +10,63 @@
 | Categories | 21 |
 | Updated | 2026-05-11 |
 
+## 核心原理：智能路由 + 组合涌现
+
+### 路由机制（Skill Routing）
+
+系统通过三层匹配自动找到最合适的 skill：
+
+| 层级 | 触发方式 | 说明 |
+|------|---------|------|
+| **Trigger 关键词** | skill 声明的触发词精确匹配 | 最高优先级 |
+| **Phase 推断** | 从 skill name/description 推断能力阶段 | analysis/generation/execution/validation |
+| **Feedback 加权** | 历史调用成功率 + 用户纠正记录 | 自我演进 |
+
+**智能 bypass**：当任务简单明确时（如 `"代码审查"` → `code-review-expert`），直接跳过编排 pipeline，避免不必要的开销。
+
+### 组合涌现（Combinatorial Emergence）
+
+多个 skill 组合时，能力不是简单叠加，而是产生**新涌现**：
+
+```
+skill-A (分析) + skill-B (执行) + skill-C (验证)
+    ↓ 组合
+= A→B→C 流水线：自动分析 → 执行 → 验证闭环
+```
+
+**涌现模式**：
+
+| 模式 | 公式 | 效果 |
+|------|------|------|
+| **串联涌现** | A→B→C | 上游输出驱动下游执行，自动形成工作流 |
+| **并联涌现** | A‖B‖C | 独立子任务并行执行，效率 ×N |
+| **反馈涌现** | A↔B | 双向校验，自我纠错 |
+
+**Phase 拓扑排序**保证执行顺序合理：
+```
+analysis(0) → planning(1) → generation(2) → execution(3) → validation(4) → integration(5)
+```
+
+### 自演进机制
+
+系统通过**双重反馈**持续优化路由：
+
+1. **真实调用数据**：`experiment-logger` 记录每次 skill 调用的成功率，成功的 skill 获得 +boost
+2. **用户纠正反馈**：用户纠正/确认组合后自动记录，下次 discover 时加权
+
+```
+高置信度反馈（多次确认）→ 大幅加权 → 稳定路由
+低置信度反馈（偶尔纠正）→ 微调 → 自适应
+```
+
+### 关键设计
+
+- **按需加载**：Stage 1 纯内存搜索 → Stage 2 短列表去重 → Stage 3 才加载完整 SKILL.md
+- **零开销优化**：短任务直接 bypass，不过 pipeline
+- **冲突解决**：phase 更高级的 skill 优先，或交给用户确认
+
+---
+
 ## Categories
 
 | Category | Count |

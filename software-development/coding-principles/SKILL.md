@@ -45,6 +45,40 @@ language: 中文
 - 不主动补类型注解、日志、埋点、监控注释。
 - 不起长名，不拆单层函数为多层。
 
+## §Absorbed: Karpathy 编码原则
+
+`karpathy-coding-principles/` has been absorbed here as `references/karpathy-coding-principles.md`.
+
+> Karpathy 编码四原则 — Think Before Coding / Simplicity First / Surgical Changes / Goal-Driven Execution
+
+### Summary of Karpathy's 4 Principles
+
+| Principle | Core Idea |
+|-----------|-----------|
+| **Think Before Coding** | Don't assume, don't hide confusion. Present tradeoffs before acting. |
+| **Simplicity First** | Minimum code to solve the problem. No add-ons未被要求的功能。 |
+| **Surgical Changes** | Only touch what must be touched. Clean up orphans from your own changes. |
+| **Goal-Driven Execution** | Translate requests into verifiable success criteria first, then iterate. |
+
+### When Karpathy Principles Add Value
+- **Plan before coding**: present assumptions + tradeoffs before touching code
+- **Evaluate a change**: is this minimal or is it over-engineered?
+- **Multi-step task**: define success criteria before executing
+
+### Quick Workflow (from Karpathy)
+```
+用户开发请求
+  → 原则1: 编码前（假设清单 + 方案选择）
+  → 用户确认
+  → 原则2: 设计方案（最小实现路径）
+  → 开始执行
+  → 原则3: 手术式修改（每行追溯到原始请求）
+  → 原则4: 目标驱动（可验证标准 + 循环验证）
+  → 交付
+```
+
+For full Karpathy content with examples, triggers, and limitations → `references/karpathy-coding-principles.md`
+
 ### 执行
 - 读代码→规划→实现→验证，一步一清。
 - 多步任务先列"步骤→验证结果/用例→代码位置"，打勾闭环。

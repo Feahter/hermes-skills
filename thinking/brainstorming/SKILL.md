@@ -70,11 +70,31 @@ Start by understanding the current project context, then ask questions one at a 
 - **Be flexible** - Go back and clarify when something doesn't make sense
 
 
-## 适用场景
+## §Absorbed Sub-skills
 
-- 当用户需要 --- 时
+These narrow thinking skills are absorbed into this umbrella (archived → content preserved in references/):
 
-## 注意事项
+| Sub-skill | Absorbed as | Reason |
+|-----------|------------|--------|
+| `thinking/six-thinking-hats` | `references/six-thinking-hats.md` | De Bono's parallel thinking — a brainstorming variant |
+| `thinking/blade-of-logic` | `references/blade-of-logic.md` | Logical analysis — a brainstorming refinement |
+| `thinking/ladder-of-abstraction` | `references/ladder-of-abstraction.md` | Abstraction shifting — a brainstorming tool |
+| `thinking/mirror-of-perspectives` | `references/mirror-of-perspectives.md` | Perspective-taking — a brainstorming catalyst |
 
-*基于 skill-creator SOP 强化*
-*更新时间: 2026-02-11*
+## Quick-Reference: Sub-Skill Workflows
+
+### Six Thinking Hats (from six-thinking-hats)
+> De Bono's parallel thinking — six dimensions: facts, emotion, risk, value, creativity, process control.
+- Best for: major decisions, team discussions, comprehensive analysis
+
+### Blade of Logic (from blade-of-logic)
+> Propositional reasoning — extract propositions, apply symbolic operators, build logical chains.
+- Best for: analyzing argumentation, spotting logical fallacies, academic writing
+
+### Ladder of Abstraction (from ladder-of-abstraction)
+> Move text between concrete (sensory detail) and abstract (philosophical concept).
+- Best for: creative writing, speech refinement, concept clarification
+
+### Mirror of Perspectives (from mirror-of-perspectives)
+> Find the unique angle that makes the problem trivially simple.
+- Best for: breakthrough thinking, product design, strategic decisions

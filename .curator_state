@@ -1,8 +1,9 @@
 {
-  "last_report_path": "/Users/fuzhuo/.hermes/logs/curator/20260510-123316",
-  "last_run_at": "2026-05-10T12:33:16.152146+00:00",
-  "last_run_duration_seconds": 23.869071,
-  "last_run_summary": "auto: no changes; llm: API call failed after 3 retries: HTTP 429: usage limit exceeded, weekly usage limit reached for Token Plan Max (45000/45000 used), resets at 2026-05-11T00:00:00+08:00 (2056)",
+  "last_report_path": "/Users/fuzhuo/.hermes/logs/curator/20260517-125138",
+  "last_run_at": "2026-05-17T12:51:38.081208+00:00",
+  "last_run_duration_seconds": 2206.464755,
+  "last_run_summary": "auto: no changes; llm: Now I have a complete picture. Let me write the final summary.\n\n---\n\n## Consolidation Pass Summary\n\n**15 skills archived. 4 umbrellas created/extended. 0 prunings.**\n\n### Clusters Processed\n\n**1. `mattpocock/*` — 6 skills → `ai-agent/skill-…",
+  "last_run_summary_shown_at": null,
   "paused": false,
-  "run_count": 1
+  "run_count": 2
 }

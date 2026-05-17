@@ -311,10 +311,62 @@ source venv/bin/activate && hermes -z "prompt content" --yolo --ignore-user-conf
 
 用于快速验证 agent 对特定 prompt 的响应，无需启动交互式 session。
 
+## §Absorbed Thinking Skills
+
+These cognitive self-governance skills have been consolidated into this umbrella (archived → content preserved in references/):
+
+| Sub-skill | Absorbed as | Reason |
+|-----------|------------|--------|
+| `thinking/self-improving` | `references/self-improving.md` | Self-correction loop — a talent-mind phase |
+| `thinking/meta-skill-skeleton` | `references/meta-skill-skeleton.md` | Skill-building meta-framework — a talent-mind tool |
+| `thinking/metacognition-auditor` | `references/metacognition-auditor.md` | Decision auditing — a talent-mind component |
+| `thinking/debugging-reasoning-framework` | `references/debugging-reasoning-framework.md` | Reasoning framework for bugs — a talent-mind application |
+| `thinking/context-pollution-defender` | `references/context-pollution-defender.md` | Cognitive hygiene — a talent-mind safeguard |
+| `thinking/response-strategy-decider` | `references/response-strategy-decider.md` | Strategy selection — a talent-mind gate |
+| `thinking/complexity-sensor` | `references/complexity-sensor.md` | Complexity detection — a talent-mind monitor |
+| `thinking/deepseek-delegation` | `references/deepseek-delegation.md` | Model delegation — a talent-mind tool |
+| `thinking/paradigm-detector` | `references/paradigm-detector.md` | Paradigm shift detection — a talent-mind strategic lens |
+
+## Quick-Reference: Absorbed Sub-Skill Workflows
+
+### Self-Improving (from self-improving)
+> 从对话分析中提取学习点，将修正永久编码到 agent 定义中。
+- Trigger: self-reflection, learning from errors, continuous improvement
+
+### Meta-Skill Skeleton (from meta-skill-skeleton)
+> 三层元认知框架（监控层/自调节层/社会智能层）来构建和评估 skill.
+- Trigger: building/evaluating skills, skill framework design
+
+### Metacognition Auditor (from metacognition-auditor)
+> 决策审计、预验尸、认知盲区检测。
+- Trigger: technical decisions, post-mortems, major decisions, framework conflicts
+
+### Debugging Reasoning Framework (from debugging-reasoning-framework)
+> 高水平AI调试推理框架。替代简单的"已知问题→假设→验证"循环。
+- Trigger: bugs, faults, system anomalies
+
+### Context Pollution Defender (from context-pollution-defender)
+> 防止长任务中上下文污染导致响应质量下降。
+- Trigger: long tasks (30min+/50+calls), user feedback drift, priority fixation
+
+### Response Strategy Decider (from response-strategy-decider)
+> 结论优先 vs 风险前置的边界判断框架。
+- Trigger: uncertainty about whether to lead with conclusion or risks
+
+### Complexity Sensor (from complexity-sensor)
+> 检测 skill 组合的复杂度、相变临界点、涌现信号。
+- Trigger: unexpected skill behavior, troubleshooting, architecture review
+
+### DeepSeek Delegation (from deepseek-delegation)
+> 通过 tmux + deepseek-tui 向 DeepSeek 分配任务。
+- Trigger: research, long drafts, batch operations, code reading
+
+### Paradigm Detector (from paradigm-detector)
+> 识别架构瓶颈、检测范式转移信号、触发重构时机。
+- Trigger: system constraints, diminishing returns, technical debt accumulation
+
 ## 参考资料
 
 - `references/tencentdb-agent-memory-2026-05-16.md` — TencentDB Agent Memory 研究记录（含落地方案设计和 T1-T5 实验验证结果）
-
-## 参考资料
 
 - `references/tencentdb-agent-memory-2026-05-16.md` — TencentDB Agent Memory 研究记录（含落地方案设计）
