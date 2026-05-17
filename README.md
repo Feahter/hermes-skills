@@ -1,14 +1,14 @@
 # hermes-skills
 
-> AI Agent Skills Collection · **181 skills** across **21 categories** · 2026-05-11
+> AI Agent Skills Collection · **179 skills** across **20 categories** · 2026-05-17
 
 ## Overview
 
 | Metric | Value |
 |--------|-------|
-| Total Skills | 181 |
-| Categories | 21 |
-| Updated | 2026-05-11 |
+| Total Skills | 179 |
+| Categories | 20 |
+| Updated | 2026-05-17 |
 
 ## 核心原理：智能路由 + 组合涌现
 
@@ -69,29 +69,28 @@ analysis(0) → planning(1) → generation(2) → execution(3) → validation(4)
 
 ## Categories
 
-| Category | Count |
+|| Category | Count |
 |---------|-------|
 | 🤖 `ai-agent` | 13 |
-| 🍎 `apple` | 1 |
+| 🍎 `apple` | 2 |
 | 🧠 `autonomous-ai-agents` | 4 |
 | 🎨 `creative` | 21 |
 | 🔬 `data-science` | 6 |
 | ⚙️ `devops` | 7 |
 | 📧 `email` | 2 |
-| 🎮 `gaming` | 0 |
 | 🐙 `github` | 1 |
 | 🔌 `mcp` | 1 |
 | 🖼️ `media` | 8 |
-| 🚀 `mlops` | 3 |
+| 🚀 `mlops` | 15 |
 | 📝 `note-taking` | 4 |
-| ⚡ `productivity` | 23 |
+| ⚡ `productivity` | 24 |
 | 🔍 `research` | 11 |
-| 🏠 `smart-home` | 0 |
-| 📱 `social-media` | 0 |
 | 💻 `software-development` | 31 |
-| 🖥️ `system` | 15 |
-| 🧩 `thinking` | 14 |
+| 🖥️ `system` | 17 |
+| 🧩 `thinking` | 2 |
 | ✍️ `writing` | 8 |
+| 🐍 `python-try-finally-wrapper-pattern` | 1 |
+| 💬 `yuanbao` | 1 |
 
 ### 🤖 ai-agent
 
